@@ -1,0 +1,27 @@
+html,
+body {
+  overflow: hidden;
+}
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.webGl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+}
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+#source {
+  position: fixed;
+  z-index: 99;
+}
+
+
+/*# sourceMappingURL=main.css.map*/
