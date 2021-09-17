@@ -4,6 +4,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import song from "../static/bensound-energy2.mp3";
+import planeVertexShader from "./shaders/vertex.glsl";
+import planeFragmentShader from "./shaders/fragment.glsl";
 //import SimplexNoise from "simplex-noise";
 
 ////AUDIO //////
@@ -32,6 +34,11 @@ const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
 };
+
+////textures////
+
+const textureLoader = new THREE.TextureLoader();
+const soicTexture = textureLoader.load("/soicMask1.jpeg");
 
 ////lights
 const hemisphericLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3);
@@ -68,6 +75,27 @@ scene.add(ambientLight); */
 
 ////objects and lights//
 
+const planeGeo = new THREE.PlaneGeometry(1, 1, 32, 32);
+
+const planeCount = planeGeo.attributes.position.count;
+const randomPlane = new Float32Array(planeCount);
+for (let i = 0; i < planeCount; i++) {
+  randomPlane[i] = Math.random();
+}
+
+planeGeo.setAttribute("aRandom", new THREE.BufferAttribute(randomPlane, 1));
+
+const shaderOneMaterial = new THREE.RawShaderMaterial({
+  vertexShader: planeVertexShader,
+  fragmentShader: planeFragmentShader,
+  uniforms: {
+    uFrequency: { value: new THREE.Vector2(10, 5) },
+    uTime: { value: 0 },
+    uColor: { value: new THREE.Color("orange") },
+    uTexture: { value: soicTexture }
+  }
+});
+
 const material = new THREE.MeshStandardMaterial();
 material.roughness = 0.4;
 
@@ -88,6 +116,15 @@ ball.position.set(-1, 0, 0);
 group.add(ball); */
 ///ball end ////
 
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(5, 5),
+  new THREE.MeshStandardMaterial({
+    roughness: 0.4
+  })
+);
+floor.rotation.x = -Math.PI * 0.5;
+floor.position.y = -0.65;
+
 const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), material);
 sphere.position.x = -1.5;
 
@@ -100,11 +137,26 @@ const torus = new THREE.Mesh(
 
 torus.position.x = 1.5;
 
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material);
-plane.rotation.x = -Math.PI * 0.5;
-plane.position.y = -0.65;
+const plane = new THREE.Mesh(planeGeo, shaderOneMaterial);
+//plane.rotation.x = -Math.PI * 0.5;
+//plane.position.y = -0.65;
+plane.scale.y = 2 / 3;
+plane.position.z = 0;
+plane.position.y = 1;
+plane.position.x = -1;
+plane.rotation.y = 0.9;
+scene.add(sphere, cube1, torus, plane, floor);
 
-scene.add(sphere, cube1, torus, plane);
+const positionAttribute = torus.geometry.getAttribute("position");
+const vertex = new THREE.Vector3();
+for (
+  let vertexIndex = 0;
+  vertexIndex < positionAttribute.count;
+  vertexIndex++
+) {
+  vertex.fromBufferAttribute(positionAttribute, vertexIndex);
+  console.log(vertex);
+}
 
 ///resize
 window.addEventListener("resize", () => {
@@ -187,6 +239,9 @@ const tick = () => {
   cube1.rotation.x = 0.4 * elapsedTime;
   //torus.rotation.y = 0.2 * soundData;
 
+  //shaders
+  shaderOneMaterial.uniforms.uTime.value = elapsedTime;
+  updateShader(soundData, 160, 130);
   //render
   renderer.render(scene, camera);
 
@@ -210,7 +265,12 @@ function updateTorus(data, max, min) {
   //(data - min) / (max - min);
   //torus.geometry.attributes.position.array.forEach(val => {});
 }
-
+function updateShader(data, max, min) {
+  const newVal = (data - min) / (max - min);
+  shaderOneMaterial.uniforms.uColor[0] = newVal * 2;
+  //shaderOneMaterial.uniforms.uColor = newVal;
+}
+console.log(shaderOneMaterial.uniforms.uColor[1]);
 console.log(spotLight);
 
 ///help
