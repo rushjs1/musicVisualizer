@@ -72,6 +72,12 @@ module.exports = {
         options: {
           name: "[sha512:hash:base64:7].[ext]"
         }
+      },
+      //shaders///
+      {
+        test: /\.(glsl|vs|fs|vert|frag)$/,
+        exclude: /node_modules/,
+        use: ["raw-loader"]
       }
     ]
   }
