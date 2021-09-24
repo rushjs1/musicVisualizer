@@ -1,11 +1,21 @@
 import "./styles.css";
 import * as THREE from "three";
+import * as dat from "dat.gui";
+import { analyze } from "web-audio-beat-detector";
+
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import song from "../static/bensound-energy2.mp3";
 import planeVertexShader from "./shaders/vertex.glsl";
 import planeFragmentShader from "./shaders/fragment.glsl";
+import floorVertexShader from "./shaders/floor/vertex.glsl";
+import floorFragmentShader from "./shaders/floor/fragment.glsl";
+
+const gui = new dat.GUI({ width: 340 });
+
+const debugObject = {};
+
 //import SimplexNoise from "simplex-noise";
 
 ////AUDIO //////
@@ -115,13 +125,39 @@ var ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
 ball.position.set(-1, 0, 0);
 group.add(ball); */
 ///ball end ////
+debugObject.depthColor = "#00ffa4";
+debugObject.surfaceColor = "#8888ff";
+var soundData = 0.0;
 
+const floorMaterial = new THREE.ShaderMaterial({
+  vertexShader: floorVertexShader,
+  fragmentShader: floorFragmentShader,
+
+  uniforms: {
+    uTime: { value: 0 },
+    uBigWavesElevation: { value: 0.2 },
+    uBigWavesFrequency: { value: new THREE.Vector2(4, 1.5) },
+    uBigWavesSpeed: { value: 0.75 },
+    //color
+    uDepthColor: { value: new THREE.Color(debugObject.depthColor) },
+    uSurfaceColor: { value: new THREE.Color(debugObject.surfaceColor) },
+    uColorOffset: { value: 0.25 },
+    uColorMulti: { value: 2 },
+    uSoundData: { value: soundData }
+  }
+});
+
+const floorGeo = new THREE.PlaneGeometry(5, 5);
+
+/* spiked floor */
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(5, 5),
-  new THREE.MeshStandardMaterial({
-    roughness: 0.4
-  })
+  new THREE.PlaneGeometry(4, 4, 128, 128),
+  floorMaterial
 );
+
+/* non spiked */
+//const floor = new THREE.Mesh(floorGeo, floorMaterial);
+
 floor.rotation.x = -Math.PI * 0.5;
 floor.position.y = -0.65;
 
@@ -146,6 +182,59 @@ plane.position.y = 1;
 plane.position.x = -1;
 plane.rotation.y = 0.9;
 scene.add(sphere, cube1, torus, plane, floor);
+
+///gui
+gui
+  .add(floorMaterial.uniforms.uBigWavesElevation, "value")
+  .min(0)
+  .max(1)
+  .step(0.001)
+  .name("uBigWavesElevation");
+
+gui
+  .add(floorMaterial.uniforms.uBigWavesFrequency.value, "x")
+  .min(0)
+  .max(10)
+  .step(0.001)
+  .name("uBigWavesFrequencyX");
+gui
+  .add(floorMaterial.uniforms.uBigWavesFrequency.value, "y")
+  .min(0)
+  .max(10)
+  .step(0.001)
+  .name("uBigWavesFrequencyY");
+
+gui
+  .add(floorMaterial.uniforms.uBigWavesSpeed, "value")
+  .min(0)
+  .max(4)
+  .step(0.001)
+  .name("uBigWavesSpeed");
+
+gui
+  .addColor(debugObject, "depthColor")
+  .name("depthColor")
+  .onChange(() => {
+    floorMaterial.uniforms.uDepthColor.value.set(debugObject.depthColor);
+  });
+gui
+  .addColor(debugObject, "surfaceColor")
+  .name("surfaceColor")
+  .onChange(() => {
+    floorMaterial.uniforms.uSurfaceColor.value.set(debugObject.surfaceColor);
+  });
+gui
+  .add(floorMaterial.uniforms.uColorOffset, "value")
+  .min(0)
+  .max(1)
+  .step(0.001)
+  .name("uColorOffset");
+gui
+  .add(floorMaterial.uniforms.uColorMulti, "value")
+  .min(0)
+  .max(10)
+  .step(0.001)
+  .name("uColorMulti");
 
 const positionAttribute = torus.geometry.getAttribute("position");
 const vertex = new THREE.Vector3();
@@ -182,7 +271,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.x = 1;
 camera.position.y = 1;
-camera.position.z = 15;
+camera.position.z = 1;
 scene.add(camera);
 
 //controls
@@ -206,6 +295,9 @@ audioLoader.load("/bensound-energy2.mp3", function(buffer) {
   sound.setLoop(true);
   sound.setVolume(0.5);
   console.log(buffer);
+  analyze(buffer).then(tempo => {
+    console.log(tempo);
+  });
 });
 const analyser = new THREE.AudioAnalyser(sound, 32);
 
@@ -225,7 +317,9 @@ const tick = () => {
 
   ///Audio ///
 
-  const soundData = analyser.getAverageFrequency();
+  //const soundData = analyser.getAverageFrequency();
+  soundData = analyser.getAverageFrequency();
+
   //console.log(soundData);
 
   updateTorus(soundData, 60, 30);
@@ -240,7 +334,14 @@ const tick = () => {
   //torus.rotation.y = 0.2 * soundData;
 
   //shaders
-  shaderOneMaterial.uniforms.uTime.value = elapsedTime;
+  //shaderOneMaterial.uniforms.uTime.value = elapsedTime;
+  //floorMaterial.uniforms.uTime.value = elapsedTime;
+  floorMaterial.uniforms.uTime.value = soundData * 0.02;
+  floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
+  floorMaterial.uniforms.uColorOffset.value = soundData * 0.002;
+  floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
+  floorMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01;
+
   updateShader(soundData, 160, 130);
   //render
   renderer.render(scene, camera);
@@ -254,7 +355,7 @@ const tick = () => {
 tick();
 
 function updateTorus(data, max, min) {
-  console.log((data - min) / (max - min));
+  //console.log((data - min) / (max - min));
 
   const newVal = (data - min) / (max - min);
   torus.rotation.y = 2 * newVal;
