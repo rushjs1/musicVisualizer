@@ -1,7 +1,6 @@
 import "./styles.css";
 import * as THREE from "three";
 import * as dat from "dat.gui";
-import { analyze } from "web-audio-beat-detector";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
@@ -295,9 +294,6 @@ audioLoader.load("/bensound-energy2.mp3", function(buffer) {
   sound.setLoop(true);
   sound.setVolume(0.5);
   console.log(buffer);
-  analyze(buffer).then(tempo => {
-    console.log(tempo);
-  });
 });
 const analyser = new THREE.AudioAnalyser(sound, 32);
 
