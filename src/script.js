@@ -183,7 +183,7 @@ plane.rotation.y = 0.9;
 scene.add(sphere, cube1, torus, plane, floor);
 
 ///gui
-gui
+/* gui
   .add(floorMaterial.uniforms.uBigWavesElevation, "value")
   .min(0)
   .max(1)
@@ -209,7 +209,7 @@ gui
   .max(4)
   .step(0.001)
   .name("uBigWavesSpeed");
-
+ */
 gui
   .addColor(debugObject, "depthColor")
   .name("depthColor")
@@ -222,7 +222,7 @@ gui
   .onChange(() => {
     floorMaterial.uniforms.uSurfaceColor.value.set(debugObject.surfaceColor);
   });
-gui
+/* gui
   .add(floorMaterial.uniforms.uColorOffset, "value")
   .min(0)
   .max(1)
@@ -233,7 +233,7 @@ gui
   .min(0)
   .max(10)
   .step(0.001)
-  .name("uColorMulti");
+  .name("uColorMulti"); */
 
 const positionAttribute = torus.geometry.getAttribute("position");
 const vertex = new THREE.Vector3();
@@ -330,9 +330,11 @@ const tick = () => {
   //torus.rotation.y = 0.2 * soundData;
 
   //shaders
-  //shaderOneMaterial.uniforms.uTime.value = elapsedTime;
+  shaderOneMaterial.uniforms.uTime.value = elapsedTime;
   //floorMaterial.uniforms.uTime.value = elapsedTime;
-  floorMaterial.uniforms.uTime.value = soundData * 0.02;
+  //floorMaterial.uniforms.uTime.value = soundData * 0.02;
+
+  //shaders
   floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
   floorMaterial.uniforms.uColorOffset.value = soundData * 0.002;
   floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;

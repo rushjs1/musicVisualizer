@@ -26,7 +26,7 @@ vec3 fade(vec3 t)
     return t*t*t*(t*(t*6.0-15.0)+10.0);
 }
 
-float cnoise(vec3 P)
+float pnoise(vec3 P)
 {
     vec3 Pi0 = floor(P); // Integer part for indexing
     vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
@@ -107,11 +107,11 @@ void main()
   
 
 
-   float elevation = sin(modelPosition.x * uBigWavesFrequency.x  * uBigWavesSpeed) * sin(modelPosition.z * uBigWavesFrequency.y  * uBigWavesSpeed) * uBigWavesElevation; 
+   float elevation = sin(modelPosition.x * uBigWavesFrequency.x  * uBigWavesSpeed) *                     sin(modelPosition.z * uBigWavesFrequency.y  * uBigWavesSpeed) *                        uBigWavesElevation; 
 
 
 
-    elevation += cnoise(vec3(modelPosition.x * 10.0, modelPosition.z * 10.0, 0.0));
+    elevation += pnoise(vec3(modelPosition.x * 10.0, modelPosition.z * 10.0, 0.0));
 
     modelPosition.y += elevation;
 
