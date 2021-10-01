@@ -6,14 +6,17 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import song from "../static/bensound-energy2.mp3";
-import planeVertexShader from "./shaders/vertex.glsl";
-import planeFragmentShader from "./shaders/fragment.glsl";
+import planeVertexShader from "./shaders/flag/vertex.glsl";
+import planeFragmentShader from "./shaders/flag/fragment.glsl";
 import floorVertexShader from "./shaders/floor/vertex.glsl";
 import floorFragmentShader from "./shaders/floor/fragment.glsl";
+import perlinColorVertexShader from "./shaders/perlinColor/vertex.glsl";
+import perlinColorFragmentShader from "./shaders/perlinColor/fragment.glsl";
 
 const gui = new dat.GUI({ width: 340 });
 
 const debugObject = {};
+const perlinDebugObject = {};
 
 //import SimplexNoise from "simplex-noise";
 
@@ -65,7 +68,7 @@ rectAreaLight.lookAt(new Vector3());
 const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
 spotLight.position.set(0, 2, 3);
 scene.add(spotLight);
-
+/* 
 const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.2);
 scene.add(pointLightHelper);
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
@@ -78,7 +81,7 @@ scene.add(rectAreaLightHelper);
 
 //helpers
 const hemisphereHelper = new THREE.HemisphereLightHelper(hemisphericLight, 0.2);
-scene.add(hemisphereHelper);
+scene.add(hemisphereHelper); */
 /* var ambientLight = new THREE.AmbientLight(0xaaaaaa);
 scene.add(ambientLight); */
 
@@ -107,22 +110,40 @@ const shaderOneMaterial = new THREE.RawShaderMaterial({
 
 const material = new THREE.MeshStandardMaterial();
 material.roughness = 0.4;
+perlinDebugObject.surfaceColor = "#0087ff";
+perlinDebugObject.depthColor = "#88949d";
+
+const perlinColorShaderMaterial = new THREE.ShaderMaterial({
+  fragmentShader: perlinColorFragmentShader,
+  vertexShader: perlinColorVertexShader,
+
+  uniforms: {
+    uTime: { value: 0 },
+    uBigWavesElevation: { value: 0.2 },
+    uBigWavesFrequency: { value: new THREE.Vector2(4, 1.5) },
+    uBigWavesSpeed: { value: 0.75 },
+    //color
+    uDepthColor: { value: new THREE.Color(perlinDebugObject.depthColor) },
+    uSurfaceColor: { value: new THREE.Color(perlinDebugObject.surfaceColor) },
+    uColorOffset: { value: 0.25 },
+    uColorMulti: { value: 2 },
+    uSoundData: { value: soundData }
+  }
+});
 
 // Objects
 
 ///ball start
 
-/* var group = new THREE.Group();
-
-var icosahedronGeometry = new THREE.IcosahedronGeometry(10, 4);
+var icosahedronGeometry = new THREE.IcosahedronGeometry(40, 16);
 var lambertMaterial = new THREE.MeshLambertMaterial({
   color: 0xff00ee,
   wireframe: true
 });
 
-var ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-ball.position.set(-1, 0, 0);
-group.add(ball); */
+var ball = new THREE.Mesh(icosahedronGeometry, perlinColorShaderMaterial);
+ball.position.set(0, 0, 0);
+
 ///ball end ////
 debugObject.depthColor = "#00ffa4";
 debugObject.surfaceColor = "#8888ff";
@@ -147,10 +168,11 @@ const floorMaterial = new THREE.ShaderMaterial({
 });
 
 const floorGeo = new THREE.PlaneGeometry(5, 5);
+const plane2geo = new THREE.PlaneGeometry(6, 10, 128, 128);
 
 /* spiked floor */
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(4, 4, 128, 128),
+  new THREE.PlaneGeometry(6, 10, 128, 128),
   floorMaterial
 );
 
@@ -160,14 +182,28 @@ const floor = new THREE.Mesh(
 floor.rotation.x = -Math.PI * 0.5;
 floor.position.y = -0.65;
 
-const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), material);
-sphere.position.x = -1.5;
+const plane2 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
+plane2.position.z = -2;
+plane2.position.y = 1;
 
-const cube1 = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.75, 0.75), material);
+const sphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5, 32, 32),
+  perlinColorShaderMaterial
+);
+sphere.position.x = -1.5;
+const sphere2 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5, 32, 32),
+  perlinColorShaderMaterial
+);
+
+const cube1 = new THREE.Mesh(
+  new THREE.BoxGeometry(0.75, 0.75, 0.75),
+  perlinColorShaderMaterial
+);
 
 const torus = new THREE.Mesh(
   new THREE.TorusGeometry(0.3, 0.2, 32, 64),
-  material
+  perlinColorShaderMaterial
 );
 
 torus.position.x = 1.5;
@@ -180,7 +216,7 @@ plane.position.z = 0;
 plane.position.y = 1;
 plane.position.x = -1;
 plane.rotation.y = 0.9;
-scene.add(sphere, cube1, torus, plane, floor);
+scene.add(sphere, cube1, torus, plane, floor, plane2, ball);
 
 ///gui
 /* gui
@@ -221,6 +257,23 @@ gui
   .name("surfaceColor")
   .onChange(() => {
     floorMaterial.uniforms.uSurfaceColor.value.set(debugObject.surfaceColor);
+  });
+gui
+  .addColor(perlinDebugObject, "depthColor")
+  .name("depthColor")
+  .onChange(() => {
+    perlinColorShaderMaterial.uniforms.uDepthColor.value.set(
+      perlinDebugObject.depthColor
+    );
+  });
+
+gui
+  .addColor(perlinDebugObject, "surfaceColor")
+  .name("surfaceColor")
+  .onChange(() => {
+    perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set(
+      perlinDebugObject.surfaceColor
+    );
   });
 /* gui
   .add(floorMaterial.uniforms.uColorOffset, "value")
@@ -293,7 +346,7 @@ audioLoader.load("/bensound-energy2.mp3", function(buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
-  console.log(buffer);
+  //console.log(buffer);
 });
 const analyser = new THREE.AudioAnalyser(sound, 32);
 
@@ -304,6 +357,20 @@ window.addEventListener("keypress", event => {
     sound.pause();
   }
 });
+window.addEventListener("touchend", event => {
+  if (!sound.isPlaying) {
+    sound.play();
+  } else {
+    sound.pause();
+  }
+});
+
+///hex to rgb
+console.log(perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set());
+console.log(Math.floor(Math.random() * 16777215).toString(16));
+
+let randomThreeColor = new THREE.Color(0xffffff);
+let randomThreeColor2 = new THREE.Color(0xffffff);
 
 ///animations///
 const clock = new THREE.Clock();
@@ -313,10 +380,9 @@ const tick = () => {
 
   ///Audio ///
 
-  //const soundData = analyser.getAverageFrequency();
   soundData = analyser.getAverageFrequency();
 
-  //console.log(soundData);
+  console.log(soundData);
 
   updateTorus(soundData, 60, 30);
 
@@ -329,16 +395,48 @@ const tick = () => {
   cube1.rotation.x = 0.4 * elapsedTime;
   //torus.rotation.y = 0.2 * soundData;
 
+  if (soundData > 175) {
+    floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.005;
+    perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
+      soundData * 0.006;
+
+    const randomColorHex = Math.floor(Math.random() * 16777215).toString(16);
+    const randomColorHex2 = Math.floor(Math.random() * 16777215).toString(16);
+
+    let newColor = `#${randomColorHex}`;
+    let newColor2 = `#${randomColorHex2}`;
+
+    console.log(newColor);
+
+    randomThreeColor.set(newColor);
+    randomThreeColor2.set(newColor2);
+
+    perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set(
+      randomThreeColor
+    );
+    perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
+  } else {
+    floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
+    perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
+      soundData * 0.003;
+  }
+
   //shaders
   shaderOneMaterial.uniforms.uTime.value = elapsedTime;
-  //floorMaterial.uniforms.uTime.value = elapsedTime;
-  //floorMaterial.uniforms.uTime.value = soundData * 0.02;
 
+  floorMaterial.uniforms.uTime.value = elapsedTime;
+  //floorMaterial.uniforms.uTime.value = soundData * 0.02;
   //shaders
   floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
   floorMaterial.uniforms.uColorOffset.value = soundData * 0.002;
-  floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
+  //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
   floorMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01;
+
+  perlinColorShaderMaterial.uniforms.uColorMulti.value = soundData * 0.01;
+  perlinColorShaderMaterial.uniforms.uColorOffset.value = soundData * 0.002;
+  //perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
+  //soundData * 0.003;
+  perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01;
 
   updateShader(soundData, 160, 130);
   //render
@@ -372,4 +470,13 @@ function updateShader(data, max, min) {
 console.log(shaderOneMaterial.uniforms.uColor[1]);
 console.log(spotLight);
 
-///help
+///hex to rgb
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  result = {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  };
+  return result;
+}

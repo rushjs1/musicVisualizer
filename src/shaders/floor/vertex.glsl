@@ -111,7 +111,7 @@ void main()
 
 
 
-    elevation += pnoise(vec3(modelPosition.x * 10.0, modelPosition.z * 10.0, 0.0));
+   // elevation += pnoise(vec3(modelPosition.x * 10.0, modelPosition.z * 10.0, 0.0));
 
     modelPosition.y += elevation;
 
