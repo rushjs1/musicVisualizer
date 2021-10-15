@@ -1,4 +1,5 @@
 import "./styles.css";
+
 import * as THREE from "three";
 import * as dat from "dat.gui";
 
@@ -6,12 +7,14 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import song from "../static/bensound-energy2.mp3";
+
 import planeVertexShader from "./shaders/flag/vertex.glsl";
 import planeFragmentShader from "./shaders/flag/fragment.glsl";
 import floorVertexShader from "./shaders/floor/vertex.glsl";
 import floorFragmentShader from "./shaders/floor/fragment.glsl";
 import perlinColorVertexShader from "./shaders/perlinColor/vertex.glsl";
 import perlinColorFragmentShader from "./shaders/perlinColor/fragment.glsl";
+import { io } from "socket.io-client";
 
 const gui = new dat.GUI({ width: 340 });
 
@@ -364,6 +367,13 @@ window.addEventListener("touchend", event => {
     sound.pause();
   }
 });
+let abletonMusicData = null;
+//socket io && ableton
+var socket = io();
+socket.on("musicEmit", function(msg) {
+  console.log(msg);
+  abletonMusicData = msg;
+});
 
 ///hex to rgb
 console.log(perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set());
@@ -396,7 +406,8 @@ const tick = () => {
   //torus.rotation.y = 0.2 * soundData;
 
   if (soundData > 175) {
-    floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.005;
+    //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.005;
+    floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData * 0.005;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
       soundData * 0.006;
 
@@ -416,7 +427,8 @@ const tick = () => {
     );
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
   } else {
-    floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
+    //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
+    floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData * 0.003;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
       soundData * 0.003;
   }
@@ -427,10 +439,21 @@ const tick = () => {
   floorMaterial.uniforms.uTime.value = elapsedTime;
   //floorMaterial.uniforms.uTime.value = soundData * 0.02;
   //shaders
-  floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
-  floorMaterial.uniforms.uColorOffset.value = soundData * 0.002;
   //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
-  floorMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01;
+
+  /* try with ableton */
+  floorMaterial.uniforms.uColorMulti.value = abletonMusicData * 190;
+
+  floorMaterial.uniforms.uColorOffset.value = abletonMusicData * 200;
+
+  floorMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData * 190;
+
+  /* normal threejs loader sound data */
+  /*  floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
+
+  floorMaterial.uniforms.uColorOffset.value = soundData * 0.002;
+ 
+  floorMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
   perlinColorShaderMaterial.uniforms.uColorMulti.value = soundData * 0.01;
   perlinColorShaderMaterial.uniforms.uColorOffset.value = soundData * 0.002;

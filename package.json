@@ -2,11 +2,11 @@
   "name": "3dmusicvisualizer",
   "version": "1.0.0",
   "description": "capstone",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "webpack serve --config ./bundler/webpack.dev.js",
     "build": "webpack --config ./bundler/webpack.prod.js",
-    "start": "node index.js",
+    "start": "node server.js",
     "heroku-postbuild": "webpack --config ./bundler/webpack.prod.js"
   },
   "author": "John Rush",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
+    "ableton-js": "^2.1.3",
     "babel-loader": "^8.2.2",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^7.0.0",
@@ -24,14 +25,19 @@
     "html-loader": "^1.3.2",
     "html-webpack-plugin": "^5.0.0-alpha.7",
     "mini-css-extract-plugin": "^1.3.5",
+    "path": "^0.12.7",
     "portfinder-sync": "0.0.2",
     "raw-loader": "^4.0.2",
     "simplex-noise": "^3.0.0",
+    "socket.io": "^4.3.0",
     "style-loader": "^2.0.0",
     "three": "^0.132.2",
-    "webpack": "^5.18.0",
-    "webpack-cli": "^4.4.0",
     "webpack-dev-server": "^3.11.2",
     "webpack-merge": "^5.7.3"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.3.0",
+    "webpack": "^5.58.2",
+    "webpack-cli": "^4.9.0"
   }
 }

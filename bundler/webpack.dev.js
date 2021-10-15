@@ -7,6 +7,10 @@ const infoColor = _message => {
 };
 module.exports = merge(commonConfig, {
   mode: "development",
+  externals: {
+    bufferutil: "bufferutil",
+    "utf-8-validate": "utf-8-validate"
+  },
   devServer: {
     host: "0.0.0.0",
     port: portFinderSync.getPort(8080),
