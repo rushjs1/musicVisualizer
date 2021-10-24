@@ -23,6 +23,7 @@ app.get("/src/", (req, res) => {
 io.on("connection", socket => {
   console.log("a user connected");
   const test = async () => {
+    ableton.on("error", () => {});
     ableton.song.addListener("is_playing", p => console.log("Playing:", p));
     ableton.song.addListener("tempo", t => console.log("Tempo:", t));
     master = await ableton.song.get("master_track");

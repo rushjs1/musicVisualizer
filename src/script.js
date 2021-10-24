@@ -7,6 +7,10 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import song from "../static/bensound-energy2.mp3";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 
 import planeVertexShader from "./shaders/flag/vertex.glsl";
 import planeFragmentShader from "./shaders/flag/fragment.glsl";
@@ -71,22 +75,6 @@ rectAreaLight.lookAt(new Vector3());
 const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
 spotLight.position.set(0, 2, 3);
 scene.add(spotLight);
-/* 
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.2);
-scene.add(pointLightHelper);
-const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(spotLightHelper);
-window.requestAnimationFrame(() => {
-  spotLightHelper.update();
-});
-const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight);
-scene.add(rectAreaLightHelper);
-
-//helpers
-const hemisphereHelper = new THREE.HemisphereLightHelper(hemisphericLight, 0.2);
-scene.add(hemisphereHelper); */
-/* var ambientLight = new THREE.AmbientLight(0xaaaaaa);
-scene.add(ambientLight); */
 
 ////objects and lights//
 
@@ -382,6 +370,15 @@ console.log(Math.floor(Math.random() * 16777215).toString(16));
 let randomThreeColor = new THREE.Color(0xffffff);
 let randomThreeColor2 = new THREE.Color(0xffffff);
 
+//postprocessing effects
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+
+composer.addPass(renderPass);
+const bloomPass = new UnrealBloomPass();
+bloomPass.strength = 0.4;
+composer.addPass(bloomPass);
+renderer.toneMappingExposure = 0.4;
 ///animations///
 const clock = new THREE.Clock();
 
@@ -405,11 +402,15 @@ const tick = () => {
   cube1.rotation.x = 0.4 * elapsedTime;
   //torus.rotation.y = 0.2 * soundData;
 
-  if (soundData > 175) {
-    //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.005;
-    floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData * 0.005;
+  if (abletonMusicData > 0.98) {
+    /*   floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.005;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
-      soundData * 0.006;
+      soundData * 0.006; */
+    floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData * 0.5;
+    perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
+
+    //postprocessing
+    bloomPass.strength = 0.4;
 
     const randomColorHex = Math.floor(Math.random() * 16777215).toString(16);
     const randomColorHex2 = Math.floor(Math.random() * 16777215).toString(16);
@@ -427,10 +428,13 @@ const tick = () => {
     );
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
   } else {
-    //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
-    floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData * 0.003;
+    /*  floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
-      soundData * 0.003;
+      soundData * 0.003; */
+    floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
+    perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
+    //bloomPass.strength = abletonMusicData * 0.9;
+    bloomPass.strength = 0.2;
   }
 
   //shaders
@@ -442,28 +446,33 @@ const tick = () => {
   //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
 
   /* try with ableton */
-  floorMaterial.uniforms.uColorMulti.value = abletonMusicData * 190;
+  floorMaterial.uniforms.uColorMulti.value = abletonMusicData;
 
-  floorMaterial.uniforms.uColorOffset.value = abletonMusicData * 200;
+  floorMaterial.uniforms.uColorOffset.value = abletonMusicData;
 
-  floorMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData * 190;
+  floorMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData;
+
+  perlinColorShaderMaterial.uniforms.uColorMulti.value = abletonMusicData;
+  perlinColorShaderMaterial.uniforms.uColorOffset.value = abletonMusicData;
+  perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData;
 
   /* normal threejs loader sound data */
-  /*  floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
+  /*   floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
 
   floorMaterial.uniforms.uColorOffset.value = soundData * 0.002;
- 
+
   floorMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
-  perlinColorShaderMaterial.uniforms.uColorMulti.value = soundData * 0.01;
+  /*   perlinColorShaderMaterial.uniforms.uColorMulti.value = soundData * 0.01;
   perlinColorShaderMaterial.uniforms.uColorOffset.value = soundData * 0.002;
   //perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
   //soundData * 0.003;
-  perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01;
+  perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
-  updateShader(soundData, 160, 130);
+  updateShader(abletonMusicData, 160, 130);
   //render
-  renderer.render(scene, camera);
+  //renderer.render(scene, camera);
+  composer.render();
 
   //analyser.getByteFrequencyData(dataArr);
   //console.log(dataArr);
