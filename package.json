@@ -7,7 +7,7 @@
     "dev": "webpack serve --config ./bundler/webpack.dev.js",
     "build": "webpack --config ./bundler/webpack.prod.js",
     "start": "node server.js",
-    "push": "git push heroku && git push github",
+    "push": "git push heroku main && git push github",
     "heroku-postbuild": "webpack --config ./bundler/webpack.prod.js"
   },
   "author": "John Rush",
