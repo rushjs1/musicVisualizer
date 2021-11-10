@@ -10,6 +10,7 @@ const io = new Server(server);
 const { Ableton } = require("ableton-js");
 const ableton = new Ableton();
 let master = null;
+let root_note = null;
 
 app.use(express.static(__dirname + "/dist"));
 
@@ -25,11 +26,17 @@ io.on("connection", socket => {
   const test = async () => {
     ableton.on("error", () => {});
     ableton.song.addListener("is_playing", p => console.log("Playing:", p));
-    ableton.song.addListener("tempo", t => console.log("Tempo:", t));
+    // ableton.song.addListener("tempo", t => console.log("Tempo:", t));
+    ableton.song.addListener("song_length", l => {
+      console.log("Length:", l);
+    });
     master = await ableton.song.get("master_track");
     master.addListener("output_meter_left", d => {
       socket.emit("musicEmit", d);
     });
+
+    root_note = await ableton.song.get("root_note");
+    console.log(root_note);
   };
 
   test();

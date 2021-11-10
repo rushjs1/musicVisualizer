@@ -22,3 +22,22 @@ body {
   position: fixed;
   z-index: 99;
 }
+
+.clear-scene-btn {
+  position: absolute;
+  color: white;
+  background-color: dodgerblue;
+  width: 20%;
+
+  margin-left: 2%;
+  height: 30px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.clear-scene-btn:hover {
+  background-color: white;
+  color: dodgerblue;
+  cursor: pointer;
+}

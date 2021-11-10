@@ -2,6 +2,8 @@ import "./styles.css";
 
 import * as THREE from "three";
 import * as dat from "dat.gui";
+import { TweenMax } from "gsap";
+import { gsap } from "gsap";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
@@ -53,6 +55,7 @@ const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
 };
+scene.background = new THREE.Color(0x6e6e6e);
 
 ////textures////
 
@@ -77,7 +80,6 @@ spotLight.position.set(0, 2, 3);
 scene.add(spotLight);
 
 ////objects and lights//
-
 const planeGeo = new THREE.PlaneGeometry(1, 1, 32, 32);
 
 const planeCount = planeGeo.attributes.position.count;
@@ -200,14 +202,90 @@ const torus = new THREE.Mesh(
 torus.position.x = 1.5;
 
 const plane = new THREE.Mesh(planeGeo, shaderOneMaterial);
+
 //plane.rotation.x = -Math.PI * 0.5;
 //plane.position.y = -0.65;
+
 plane.scale.y = 2 / 3;
 plane.position.z = 0;
 plane.position.y = 1;
 plane.position.x = -1;
 plane.rotation.y = 0.9;
-scene.add(sphere, cube1, torus, plane, floor, plane2, ball);
+
+///group of spheres for viz
+const sphereGroup = new THREE.Object3D();
+const spheres = [];
+
+function createSphere(geo, mat) {
+  const newSphere = new THREE.Mesh(geo, mat);
+  newSphere.position.y = 0.5;
+  return newSphere;
+}
+function positionSpheres() {
+  const sWidth = 8;
+  const sGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+  const sMaterial = new THREE.MeshPhongMaterial({
+    color: 0x4b12b3,
+    specular: 0xffffff,
+    shininess: 100,
+    emissive: 0x0,
+    flatShading: THREE.SmoothShading,
+    side: THREE.DoubleSide
+  });
+  for (let i = 0; i < sWidth; i++) {
+    for (let j = 0; j < sWidth; j++) {
+      let sSphere = createSphere(sGeometry, sMaterial);
+      sphereGroup.add(sSphere);
+      sSphere.position.x = j;
+      sSphere.position.y = i;
+
+      spheres.push(sSphere);
+    }
+  }
+  sphereGroup.position.set(-3, 0, 0);
+}
+//positionSpheres();
+
+//infinity practice
+
+var iMesh = null;
+var iGroup = new THREE.Object3D();
+var sectionWidth = 8;
+var loopSectionPosition = 0;
+var iBoxGeo = new THREE.BoxGeometry(0.75, 0.75, 0.75);
+
+const iMat = new THREE.MeshNormalMaterial({});
+const iMat2 = new THREE.MeshBasicMaterial({
+  color: 0x00ff00
+});
+function addInstancedMesh() {
+  iMesh = new THREE.InstancedMesh(iBoxGeo, iMat, 4);
+  scene.add(iMesh);
+  iPositions(iMesh, 0);
+}
+
+function iPositions(mesh, section) {
+  for (var i = 0; i < mesh.count; i++) {
+    var zStaticPosition = -sectionWidth * (i + 1);
+    var zSectionPosition = sectionWidth * section;
+    var z = zStaticPosition + zSectionPosition;
+
+    iGroup.position.set(0, 0, z);
+    iGroup.updateMatrix();
+    mesh.setMatrixAt(i, iGroup.matrix);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+}
+
+function runInfinity() {
+  var distance = Math.round(camera.position.z / sectionWidth);
+  if (distance !== loopSectionPosition) {
+    loopSectionPosition = distance;
+    iPositions(iMesh, loopSectionPosition);
+  }
+}
+
+scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
 
 ///gui
 /* gui
@@ -279,7 +357,7 @@ gui
   .step(0.001)
   .name("uColorMulti"); */
 
-const positionAttribute = torus.geometry.getAttribute("position");
+/* const positionAttribute = torus.geometry.getAttribute("position");
 const vertex = new THREE.Vector3();
 for (
   let vertexIndex = 0;
@@ -288,7 +366,7 @@ for (
 ) {
   vertex.fromBufferAttribute(positionAttribute, vertexIndex);
   console.log(vertex);
-}
+} */
 
 ///resize
 window.addEventListener("resize", () => {
@@ -318,28 +396,38 @@ camera.position.z = 1;
 scene.add(camera);
 
 //controls
-const controls = new OrbitControls(camera, canvas);
+let controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 
 //renderer///
-const renderer = new THREE.WebGL1Renderer({
+let renderer = new THREE.WebGL1Renderer({
   canvas: canvas
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+/* function render() {
+  camera.position.z -= 0.4;
+  runInfinity();
+  composer.render();
+} */
 
 //////threejs audio loader//////
 const listener = new THREE.AudioListener();
 camera.add(listener);
 const sound = new THREE.Audio(listener);
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load("/bensound-energy2.mp3", function(buffer) {
+audioLoader.load("/rezz.mp3", function(buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
   //console.log(buffer);
 });
-const analyser = new THREE.AudioAnalyser(sound, 32);
+console.log(sound);
+//THREE ANALYSER
+const analyser = new THREE.AudioAnalyser(sound, 128);
+const soundDataArray = analyser.data;
+const bufferLength = analyser.analyser.frequencyBinCount;
 
 window.addEventListener("keypress", event => {
   if (!sound.isPlaying) {
@@ -355,13 +443,72 @@ window.addEventListener("touchend", event => {
     sound.pause();
   }
 });
+
+function moveSphereWave() {
+  if (sound.isPlaying) {
+    analyser.getFrequencyData(soundDataArray);
+
+    for (var i = 0; i < bufferLength; i++) {
+      const p = soundDataArray[i];
+      const s = spheres[i];
+      const z = s.position;
+      gsap.to(z, 0.2, {
+        y: p / 40
+      });
+    }
+  }
+}
+
+function moveAbletonSphereWave() {
+  if (abletonMusicData > 0) {
+    aAnalyser.getFrequencyData(abletonSoundDataArray);
+
+    for (var i = 0; i < abletonBufferLength; i++) {
+      const p = abletonSoundDataArray[i];
+      const s = spheres[i];
+      const z = s.position;
+      gsap.to(z, 0.2, {
+        y: p / 80
+      });
+    }
+  }
+}
+
 let abletonMusicData = null;
 //socket io && ableton
 var socket = io();
 socket.on("musicEmit", function(msg) {
-  console.log(msg);
+  // console.log(msg);
   abletonMusicData = msg;
 });
+
+/* let abletonSourceData, abletonAnalyser;
+
+let abletonContext = new AudioContext();
+abletonSourceData = abletonContext.createBuffer(abletonMusicData);
+abletonAnalyser = abletonContext.createAnalyser();
+abletonSourceData.connect(analyser);
+abletonAnalyser.connect(abletonContext.destination);
+abletonAnalyser.fftSize = 128;
+console.log(abletonAnalyser); */
+
+/* const abletonAnalyser = new THREE.AudioAnalyser(abletonMusicData, 128);
+const abletonSoundDataArray = abletonAnalyser.data;
+const abletonBufferLength = abletonAnalyser.analyser.frequencyBinCount; */
+
+const abletonListener = new THREE.AudioListener();
+camera.add(abletonListener);
+const abletonSound = new THREE.Audio(abletonListener);
+const abletonAudioLoader = new THREE.AudioLoader();
+abletonAudioLoader.load(abletonMusicData, function(buffer) {
+  abletonSound.setBuffer(buffer);
+  abletonSound.setLoop(false);
+  abletonSound.setVolume(0.5);
+  abletonSound.play();
+});
+const aAnalyser = new THREE.AudioAnalyser(abletonSound, 128);
+const abletonSoundDataArray = aAnalyser.data;
+const abletonBufferLength = aAnalyser.analyser.frequencyBinCount;
 
 ///hex to rgb
 console.log(perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set());
@@ -372,13 +519,30 @@ let randomThreeColor2 = new THREE.Color(0xffffff);
 
 //postprocessing effects
 const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
+let renderPass = new RenderPass(scene, camera);
 
 composer.addPass(renderPass);
 const bloomPass = new UnrealBloomPass();
-bloomPass.strength = 0.4;
+bloomPass.strength = 0.8;
 composer.addPass(bloomPass);
 renderer.toneMappingExposure = 0.4;
+
+gui
+  .add(renderer, "toneMappingExposure")
+  .min(0)
+  .max(1)
+  .step(0.001)
+  .name("toneMappingExposure");
+
+gui
+  .add(bloomPass, "strength")
+  .min(0)
+  .max(1)
+  .step(0.001)
+  .name("bloomStrength");
+
+console.log(bloomPass);
+
 ///animations///
 const clock = new THREE.Clock();
 
@@ -386,12 +550,15 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   ///Audio ///
+  const aData = aAnalyser.getAverageFrequency();
+  // console.log(aData);
+
+  moveSphereWave();
+  moveAbletonSphereWave();
 
   soundData = analyser.getAverageFrequency();
 
-  console.log(soundData);
-
-  updateTorus(soundData, 60, 30);
+  //console.log(soundData);
 
   //update controls
   controls.update();
@@ -402,7 +569,7 @@ const tick = () => {
   cube1.rotation.x = 0.4 * elapsedTime;
   //torus.rotation.y = 0.2 * soundData;
 
-  if (abletonMusicData > 0.98) {
+  if (abletonMusicData > 0.9) {
     /*   floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.005;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
       soundData * 0.006; */
@@ -410,8 +577,8 @@ const tick = () => {
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
 
     //postprocessing
-    bloomPass.strength = 0.4;
-
+    //bloomPass.strength = 0.4;
+    bloomPass.strength = abletonMusicData;
     const randomColorHex = Math.floor(Math.random() * 16777215).toString(16);
     const randomColorHex2 = Math.floor(Math.random() * 16777215).toString(16);
 
@@ -433,8 +600,8 @@ const tick = () => {
       soundData * 0.003; */
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
-    //bloomPass.strength = abletonMusicData * 0.9;
-    bloomPass.strength = 0.2;
+    bloomPass.strength = abletonMusicData / 3;
+    //bloomPass.strength = 0.2;
   }
 
   //shaders
@@ -446,6 +613,7 @@ const tick = () => {
   //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
 
   /* try with ableton */
+  //bloomPass.strength = abletonMusicData / 3;
   floorMaterial.uniforms.uColorMulti.value = abletonMusicData;
 
   floorMaterial.uniforms.uColorOffset.value = abletonMusicData;
@@ -469,46 +637,44 @@ const tick = () => {
   //soundData * 0.003;
   perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
+  updateTorus(soundData, 60, 30);
   updateShader(abletonMusicData, 160, 130);
+  addInstancedMesh();
+
   //render
   //renderer.render(scene, camera);
   composer.render();
-
-  //analyser.getByteFrequencyData(dataArr);
-  //console.log(dataArr);
+  //for INFINITY LOOP
+  //render();
 
   window.requestAnimationFrame(tick);
 };
 
 tick();
 
+//helpers
 function updateTorus(data, max, min) {
-  //console.log((data - min) / (max - min));
-
   const newVal = (data - min) / (max - min);
   torus.rotation.y = 2 * newVal;
   spotLight.intensity = 1 * newVal;
   pointLight.intensity = 0.4 * newVal;
-  //console.log(Math.max(0, Math.min(1, data-min / max-min)))
-  // console.log(Math.max(0, Math.min(1, data - min / max - min)));
-  //(data - min) / (max - min);
-  //torus.geometry.attributes.position.array.forEach(val => {});
 }
 function updateShader(data, max, min) {
   const newVal = (data - min) / (max - min);
   shaderOneMaterial.uniforms.uColor[0] = newVal * 2;
-  //shaderOneMaterial.uniforms.uColor = newVal;
 }
-console.log(shaderOneMaterial.uniforms.uColor[1]);
-console.log(spotLight);
 
-///hex to rgb
-function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  result = {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  };
-  return result;
+//remove scene attempt
+function clearScene() {
+  renderer.dispose();
+  //scene.clear();
+  scene.remove(sphere, cube1, torus, plane, floor, plane2, ball);
+  positionSpheres();
 }
+
+var clearBtn = document.querySelector(".clear-scene-btn");
+
+clearBtn.addEventListener("click", () => {
+  console.log("clear");
+  clearScene();
+});
