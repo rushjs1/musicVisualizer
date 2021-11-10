@@ -417,7 +417,7 @@ const listener = new THREE.AudioListener();
 camera.add(listener);
 const sound = new THREE.Audio(listener);
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load("/rezz.mp3", function(buffer) {
+audioLoader.load("/bensound-energy2.mp3", function(buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
