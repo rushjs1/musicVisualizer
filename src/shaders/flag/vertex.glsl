@@ -22,7 +22,7 @@ varying vec2 vUv;
      vec4 projectedPosition = projectionMatrix * viewPosition;
 
      gl_Position = projectedPosition;
-     //vUv = uv;
+     vUv = uv;
     // vElevation = elevation;
      
       }

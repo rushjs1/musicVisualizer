@@ -7,11 +7,10 @@ import { gsap } from "gsap";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Vector3 } from "three";
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
-import song from "../static/bensound-energy2.mp3";
+
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 
 import planeVertexShader from "./shaders/flag/vertex.glsl";
@@ -165,7 +164,7 @@ const plane2geo = new THREE.PlaneGeometry(6, 10, 128, 128);
 
 /* spiked floor */
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(6, 10, 128, 128),
+  new THREE.PlaneGeometry(12, 20, 128, 128),
   floorMaterial
 );
 
@@ -417,7 +416,7 @@ const listener = new THREE.AudioListener();
 camera.add(listener);
 const sound = new THREE.Audio(listener);
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load("/bensound-energy2.mp3", function(buffer) {
+audioLoader.load("/instructionSet.mp3", function(buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
@@ -459,7 +458,7 @@ function moveSphereWave() {
   }
 }
 
-function moveAbletonSphereWave() {
+/* function moveAbletonSphereWave() {
   if (abletonMusicData > 0) {
     aAnalyser.getFrequencyData(abletonSoundDataArray);
 
@@ -472,7 +471,7 @@ function moveAbletonSphereWave() {
       });
     }
   }
-}
+} */
 
 let abletonMusicData = null;
 //socket io && ableton
@@ -526,6 +525,8 @@ const bloomPass = new UnrealBloomPass();
 bloomPass.strength = 0.8;
 composer.addPass(bloomPass);
 renderer.toneMappingExposure = 0.4;
+const glitchPass = new GlitchPass();
+composer.addPass(glitchPass);
 
 gui
   .add(renderer, "toneMappingExposure")
@@ -550,11 +551,11 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   ///Audio ///
-  const aData = aAnalyser.getAverageFrequency();
+  //const aData = aAnalyser.getAverageFrequency();
   // console.log(aData);
 
   moveSphereWave();
-  moveAbletonSphereWave();
+  //moveAbletonSphereWave();
 
   soundData = analyser.getAverageFrequency();
 
@@ -579,6 +580,7 @@ const tick = () => {
     //postprocessing
     //bloomPass.strength = 0.4;
     bloomPass.strength = abletonMusicData;
+    glitchPass.goWild = true;
     const randomColorHex = Math.floor(Math.random() * 16777215).toString(16);
     const randomColorHex2 = Math.floor(Math.random() * 16777215).toString(16);
 
@@ -601,6 +603,7 @@ const tick = () => {
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     bloomPass.strength = abletonMusicData / 3;
+    glitchPass.goWild = false;
     //bloomPass.strength = 0.2;
   }
 

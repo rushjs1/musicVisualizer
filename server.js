@@ -26,10 +26,9 @@ io.on("connection", socket => {
   const test = async () => {
     ableton.on("error", () => {});
     ableton.song.addListener("is_playing", p => console.log("Playing:", p));
+
     // ableton.song.addListener("tempo", t => console.log("Tempo:", t));
-    ableton.song.addListener("song_length", l => {
-      console.log("Length:", l);
-    });
+
     master = await ableton.song.get("master_track");
     master.addListener("output_meter_left", d => {
       socket.emit("musicEmit", d);
