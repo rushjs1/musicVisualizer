@@ -40,7 +40,8 @@ scene.background = new THREE.Color(0x00ffa4);
 ////textures////
 
 const textureLoader = new THREE.TextureLoader();
-const soicTexture = textureLoader.load("/soicMask1.jpeg");
+const soicTexture = textureLoader.load("/shaderTextures/soicMask1.jpeg");
+const particleTexture = textureLoader.load("/particles/1.png");
 
 ////lights
 const hemisphericLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3);
@@ -58,7 +59,26 @@ const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
 spotLight.position.set(0, 2, 3);
 scene.add(spotLight, pointLight);
 
-////objects and lights//
+//particles
+const particlesGeo = new THREE.BufferGeometry();
+const count = 1750;
+const partPos = new Float32Array(count * 3);
+for (let i = 0; i < count * 3; i++) {
+  partPos[i] = (Math.random() - 0.5) * 30;
+}
+particlesGeo.setAttribute("position", new THREE.BufferAttribute(partPos, 3));
+const partMat = new THREE.PointsMaterial({
+  size: 0.2,
+  sizeAttenuation: true,
+  color: new THREE.Color(0x8888ff),
+  transparent: true,
+  alphaMap: particleTexture,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+});
+
+const particles = new THREE.Points(particlesGeo, partMat);
+
 const planeGeo = new THREE.PlaneGeometry(1, 1, 32, 32);
 
 const planeCount = planeGeo.attributes.position.count;
@@ -267,7 +287,7 @@ function runInfinity() {
 }
 
 //scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
-scene.add(sphere, plane, floor, plane2, ball, sphereGroup);
+scene.add(sphere, plane, floor, plane2, ball, sphereGroup, particles);
 
 ///gui
 /* gui
@@ -399,7 +419,7 @@ const listener = new THREE.AudioListener();
 camera.add(listener);
 const sound = new THREE.Audio(listener);
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load("/instructionSet.mp3", function(buffer) {
+audioLoader.load("/songs/instructionSet.mp3", function(buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
