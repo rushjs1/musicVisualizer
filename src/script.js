@@ -579,11 +579,12 @@ const tick = () => {
 
   updateTorus(soundData, 60, 30);
   updateShader(abletonMusicData, 160, 130);
-  addInstancedMesh();
+
   //render
   //renderer.render(scene, camera);
   composer.render();
   //for INFINITY LOOP
+  // addInstancedMesh();
   //render();
 
   window.requestAnimationFrame(tick);
