@@ -35,8 +35,8 @@ const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
 };
-scene.background = new THREE.Color(0x6e6e6e);
-
+//scene.background = new THREE.Color(0x6e6e6e);
+scene.background = new THREE.Color(0x00ffa4);
 ////textures////
 
 const textureLoader = new THREE.TextureLoader();
@@ -159,10 +159,10 @@ plane2.position.z = -2;
 plane2.position.y = 1;
 
 const sphere = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 32, 32),
+  new THREE.SphereGeometry(2, 32, 32),
   perlinColorShaderMaterial
 );
-sphere.position.x = -1.5;
+sphere.position.x = 1.5;
 const sphere2 = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 32, 32),
   perlinColorShaderMaterial
@@ -234,8 +234,13 @@ const iMat = new THREE.MeshNormalMaterial({});
 const iMat2 = new THREE.MeshBasicMaterial({
   color: 0x00ff00
 });
+const iAmount = parseInt(window.location.search.substr(1)) || 10;
+const iCount = Math.pow(iAmount, 3);
+
 function addInstancedMesh() {
   iMesh = new THREE.InstancedMesh(iBoxGeo, iMat, 4);
+  iMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
   scene.add(iMesh);
   iPositions(iMesh, 0);
 }
@@ -261,7 +266,8 @@ function runInfinity() {
   }
 }
 
-scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
+//scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
+scene.add(sphere, plane, floor, plane2, ball, sphereGroup);
 
 ///gui
 /* gui
@@ -574,7 +580,6 @@ const tick = () => {
   updateTorus(soundData, 60, 30);
   updateShader(abletonMusicData, 160, 130);
   addInstancedMesh();
-
   //render
   //renderer.render(scene, camera);
   composer.render();
