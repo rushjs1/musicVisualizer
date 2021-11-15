@@ -599,11 +599,24 @@ function updateShader(data, max, min) {
 }
 
 //remove scene attempt
+
+var sceneBool = true;
+
 function clearScene() {
   renderer.dispose();
-  //scene.clear();
-  scene.remove(sphere, cube1, torus, plane, floor, plane2, ball);
-  positionSpheres();
+  sceneBool = !sceneBool;
+  console.log(sceneBool);
+  if (!sceneBool) {
+    scene.remove(sphere, cube1, torus, plane, floor, plane2, ball);
+    if (!sphereGroup.visible) {
+      sphereGroup.visible = true;
+    } else {
+      positionSpheres();
+    }
+  } else if (sceneBool) {
+    scene.add(sphere, cube1, torus, plane, floor, plane2, ball);
+    sphereGroup.visible = false;
+  }
 }
 
 var clearBtn = document.querySelector(".clear-scene-btn");
