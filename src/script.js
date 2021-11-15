@@ -28,25 +28,6 @@ const perlinDebugObject = {};
 
 //import SimplexNoise from "simplex-noise";
 
-////AUDIO //////
-/* var noise = new SimplexNoise();
-const audioElement = document.getElementById("source");
-const audioContext = new AudioContext();
-const analyser = audioContext.createAnalyser();
-analyser.fftSize = 512;
-const source = audioContext.createMediaElementSource(audioElement);
-source.connect(analyser);
-///connect music back to default output which is the speakers/////
-source.connect(audioContext.destination);
-
-var bufferLength = analyser.frequencyBinCount;
-var dataArr = new Uint8Array(bufferLength);
-
-//analyser.getByteFrequencyData(dataArr);
-//analyser.getByteTimeFreData(dataArr);
-
- */
-
 //canvas and scene and sizes
 const canvas = document.querySelector("canvas.webGL");
 const scene = new THREE.Scene();
@@ -64,9 +45,6 @@ const soicTexture = textureLoader.load("/soicMask1.jpeg");
 ////lights
 const hemisphericLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3);
 scene.add(hemisphericLight);
-const pointLight = new THREE.PointLight(0xff9000, 1, 4.5);
-pointLight.position.set(-1, -0.5, 1);
-scene.add(pointLight);
 const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
 rectAreaLight.position.set(-1.5, 0, 1.5);
 scene.add(rectAreaLight);
@@ -74,9 +52,11 @@ rectAreaLight.lookAt(new Vector3());
 
 //light helpers - frames
 
+const pointLight = new THREE.PointLight(0xff9000, 1, 4.5);
+pointLight.position.set(-1, -0.5, 1);
 const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
 spotLight.position.set(0, 2, 3);
-scene.add(spotLight);
+scene.add(spotLight, pointLight);
 
 ////objects and lights//
 const planeGeo = new THREE.PlaneGeometry(1, 1, 32, 32);
@@ -201,9 +181,6 @@ const torus = new THREE.Mesh(
 torus.position.x = 1.5;
 
 const plane = new THREE.Mesh(planeGeo, shaderOneMaterial);
-
-//plane.rotation.x = -Math.PI * 0.5;
-//plane.position.y = -0.65;
 
 plane.scale.y = 2 / 3;
 plane.position.z = 0;
@@ -458,21 +435,6 @@ function moveSphereWave() {
   }
 }
 
-/* function moveAbletonSphereWave() {
-  if (abletonMusicData > 0) {
-    aAnalyser.getFrequencyData(abletonSoundDataArray);
-
-    for (var i = 0; i < abletonBufferLength; i++) {
-      const p = abletonSoundDataArray[i];
-      const s = spheres[i];
-      const z = s.position;
-      gsap.to(z, 0.2, {
-        y: p / 80
-      });
-    }
-  }
-} */
-
 let abletonMusicData = null;
 //socket io && ableton
 var socket = io();
@@ -480,34 +442,6 @@ socket.on("musicEmit", function(msg) {
   // console.log(msg);
   abletonMusicData = msg;
 });
-
-/* let abletonSourceData, abletonAnalyser;
-
-let abletonContext = new AudioContext();
-abletonSourceData = abletonContext.createBuffer(abletonMusicData);
-abletonAnalyser = abletonContext.createAnalyser();
-abletonSourceData.connect(analyser);
-abletonAnalyser.connect(abletonContext.destination);
-abletonAnalyser.fftSize = 128;
-console.log(abletonAnalyser); */
-
-/* const abletonAnalyser = new THREE.AudioAnalyser(abletonMusicData, 128);
-const abletonSoundDataArray = abletonAnalyser.data;
-const abletonBufferLength = abletonAnalyser.analyser.frequencyBinCount; */
-
-const abletonListener = new THREE.AudioListener();
-camera.add(abletonListener);
-const abletonSound = new THREE.Audio(abletonListener);
-const abletonAudioLoader = new THREE.AudioLoader();
-abletonAudioLoader.load(abletonMusicData, function(buffer) {
-  abletonSound.setBuffer(buffer);
-  abletonSound.setLoop(false);
-  abletonSound.setVolume(0.5);
-  abletonSound.play();
-});
-const aAnalyser = new THREE.AudioAnalyser(abletonSound, 128);
-const abletonSoundDataArray = aAnalyser.data;
-const abletonBufferLength = aAnalyser.analyser.frequencyBinCount;
 
 ///hex to rgb
 console.log(perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set());
@@ -526,7 +460,7 @@ bloomPass.strength = 0.8;
 composer.addPass(bloomPass);
 renderer.toneMappingExposure = 0.4;
 const glitchPass = new GlitchPass();
-composer.addPass(glitchPass);
+//composer.addPass(glitchPass);
 
 gui
   .add(renderer, "toneMappingExposure")
@@ -551,11 +485,8 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   ///Audio ///
-  //const aData = aAnalyser.getAverageFrequency();
-  // console.log(aData);
 
   moveSphereWave();
-  //moveAbletonSphereWave();
 
   soundData = analyser.getAverageFrequency();
 
