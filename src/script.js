@@ -70,7 +70,7 @@ particlesGeo.setAttribute("position", new THREE.BufferAttribute(partPos, 3));
 const partMat = new THREE.PointsMaterial({
   size: 0.2,
   sizeAttenuation: true,
-  color: new THREE.Color(0x8888ff),
+  color: new THREE.Color(0xff3000),
   transparent: true,
   alphaMap: particleTexture,
   depthWrite: false,
@@ -287,7 +287,7 @@ function runInfinity() {
 }
 
 //scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
-scene.add(sphere, plane, floor, plane2, ball, sphereGroup, particles);
+scene.add(sphere, plane, floor, plane2, ball, sphereGroup);
 
 ///gui
 /* gui
@@ -395,6 +395,7 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.x = 1;
 camera.position.y = 1;
 camera.position.z = 1;
+
 scene.add(camera);
 
 //controls
@@ -419,7 +420,7 @@ const listener = new THREE.AudioListener();
 camera.add(listener);
 const sound = new THREE.Audio(listener);
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load("/songs/instructionSet.mp3", function(buffer) {
+audioLoader.load("/songs/rezz2.mp3", function(buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
@@ -455,7 +456,7 @@ function moveSphereWave() {
       const s = spheres[i];
       const z = s.position;
       gsap.to(z, 0.2, {
-        y: p / 40
+        y: p / 30
       });
     }
   }
@@ -597,6 +598,8 @@ const tick = () => {
   //soundData * 0.003;
   perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
+  ///camera
+
   updateTorus(soundData, 60, 30);
   updateShader(abletonMusicData, 160, 130);
 
@@ -635,13 +638,19 @@ function clearScene() {
   if (!sceneBool) {
     scene.remove(sphere, cube1, torus, plane, floor, plane2, ball);
     if (!sphereGroup.visible) {
+      scene.add(particles);
       sphereGroup.visible = true;
+      scene.background = new THREE.Color(0x6e6e6e);
     } else {
+      scene.add(particles);
+      scene.background = new THREE.Color(0x6e6e6e);
       positionSpheres();
     }
   } else if (sceneBool) {
     scene.add(sphere, cube1, torus, plane, floor, plane2, ball);
+    scene.remove(particles);
     sphereGroup.visible = false;
+    scene.background = new THREE.Color(0x00ffa4);
   }
 }
 
