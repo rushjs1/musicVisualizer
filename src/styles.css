@@ -28,7 +28,7 @@ body {
   color: white;
   background-color: dodgerblue;
   width: 20%;
-
+  margin-top: 3%;
   margin-left: 2%;
   height: 30px;
   border-radius: 15px;
@@ -37,6 +37,25 @@ body {
   align-items: center;
 }
 .clear-scene-btn:hover {
+  background-color: white;
+  color: dodgerblue;
+  cursor: pointer;
+}
+.song-parent {
+  width: 30%;
+  position: absolute;
+  margin-top: 8%;
+  margin-left: 2%;
+}
+#song-select {
+  height: 30px;
+  width: 160px;
+  border-radius: 5px;
+  border: none;
+  background-color: dodgerblue;
+  color: white;
+}
+#song-select :hover {
   background-color: white;
   color: dodgerblue;
   cursor: pointer;

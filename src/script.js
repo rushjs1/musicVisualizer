@@ -12,7 +12,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
-
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import planeVertexShader from "./shaders/flag/vertex.glsl";
 import planeFragmentShader from "./shaders/flag/fragment.glsl";
 import floorVertexShader from "./shaders/floor/vertex.glsl";
@@ -36,12 +36,13 @@ const sizes = {
   height: window.innerHeight
 };
 //scene.background = new THREE.Color(0x6e6e6e);
-scene.background = new THREE.Color(0x00ffa4);
+//scene.background = new THREE.Color(0x00ffa4);
 ////textures////
-
 const textureLoader = new THREE.TextureLoader();
 const soicTexture = textureLoader.load("/shaderTextures/soicMask1.jpeg");
 const particleTexture = textureLoader.load("/particles/1.png");
+
+//model loader
 
 ////lights
 const hemisphericLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3);
@@ -208,17 +209,29 @@ plane.position.y = 1;
 plane.position.x = -1;
 plane.rotation.y = 0.9;
 
+//get selected song
+const selectSongDV = document.getElementById("song-select");
+let selectedSong;
+selectedSong = selectSongDV.options[selectSongDV.selectedIndex].value;
+console.log(selectedSong);
+
+selectSongDV.addEventListener("change", () => {
+  selectedSong = selectSongDV.options[selectSongDV.selectedIndex].value;
+  console.log(selectedSong);
+  loadThreeAudio(selectedSong);
+});
+
 ///group of spheres for viz
 const sphereGroup = new THREE.Object3D();
 const spheres = [];
-
+let sWidth = 64;
 function createSphere(geo, mat) {
   const newSphere = new THREE.Mesh(geo, mat);
   newSphere.position.y = 0.5;
   return newSphere;
 }
+
 function positionSpheres() {
-  const sWidth = 8;
   const sGeometry = new THREE.SphereGeometry(0.3, 32, 32);
   const sMaterial = new THREE.MeshPhongMaterial({
     color: 0x4b12b3,
@@ -228,17 +241,19 @@ function positionSpheres() {
     flatShading: THREE.SmoothShading,
     side: THREE.DoubleSide
   });
-  for (let i = 0; i < sWidth; i++) {
+  for (let i = 0; i < sWidth / 8; i++) {
     for (let j = 0; j < sWidth; j++) {
       let sSphere = createSphere(sGeometry, sMaterial);
       sphereGroup.add(sSphere);
       sSphere.position.x = j;
       sSphere.position.y = i;
+      sSphere.position.z = i;
 
       spheres.push(sSphere);
     }
   }
-  sphereGroup.position.set(-3, 0, 0);
+
+  sphereGroup.position.set(-26, 0, 0);
 }
 //positionSpheres();
 
@@ -290,6 +305,7 @@ function runInfinity() {
 scene.add(sphere, plane, floor, plane2, ball, sphereGroup);
 
 ///gui
+
 /* gui
   .add(floorMaterial.uniforms.uBigWavesElevation, "value")
   .min(0)
@@ -394,7 +410,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.x = 1;
 camera.position.y = 1;
-camera.position.z = 1;
+camera.position.z = 8;
 
 scene.add(camera);
 
@@ -416,31 +432,47 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 } */
 
 //////threejs audio loader//////
-const listener = new THREE.AudioListener();
-camera.add(listener);
-const sound = new THREE.Audio(listener);
-const audioLoader = new THREE.AudioLoader();
-audioLoader.load("/songs/rezz2.mp3", function(buffer) {
-  sound.setBuffer(buffer);
-  sound.setLoop(true);
-  sound.setVolume(0.5);
-  //console.log(buffer);
-});
-console.log(sound);
-//THREE ANALYSER
-const analyser = new THREE.AudioAnalyser(sound, 128);
-const soundDataArray = analyser.data;
-const bufferLength = analyser.analyser.frequencyBinCount;
+
+let soundDataArray, bufferLength, analyser, sound;
+
+function loadThreeAudio(song) {
+  let listener = null;
+  let audioLoader = null;
+  if (sound && sound.isPlaying) {
+    sound.pause();
+    /*   sound = null;
+    soundDataArray = null;
+    bufferLength = null;
+    analyser = null; */
+  }
+
+  listener = new THREE.AudioListener();
+  camera.add(listener);
+  sound = new THREE.Audio(listener);
+  audioLoader = new THREE.AudioLoader();
+  audioLoader.load(`/songs/${song}.mp3`, function(buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.5);
+    //console.log(buffer);
+  });
+  console.log(sound);
+  //THREE ANALYSER
+  analyser = new THREE.AudioAnalyser(sound, 1024);
+  soundDataArray = analyser.data;
+  bufferLength = analyser.analyser.frequencyBinCount;
+}
+loadThreeAudio(selectedSong);
 
 window.addEventListener("keypress", event => {
-  if (!sound.isPlaying) {
+  if (sound && !sound.isPlaying) {
     sound.play();
   } else {
     sound.pause();
   }
 });
 window.addEventListener("touchend", event => {
-  if (!sound.isPlaying) {
+  if (sound && !sound.isPlaying) {
     sound.play();
   } else {
     sound.pause();
@@ -448,7 +480,7 @@ window.addEventListener("touchend", event => {
 });
 
 function moveSphereWave() {
-  if (sound.isPlaying) {
+  if (sound && sound.isPlaying) {
     analyser.getFrequencyData(soundDataArray);
 
     for (var i = 0; i < bufferLength; i++) {
@@ -515,7 +547,7 @@ const tick = () => {
 
   moveSphereWave();
 
-  soundData = analyser.getAverageFrequency();
+  //soundData = analyser.getAverageFrequency();
 
   //console.log(soundData);
 
@@ -563,6 +595,8 @@ const tick = () => {
     bloomPass.strength = abletonMusicData / 3;
     glitchPass.goWild = false;
     //bloomPass.strength = 0.2;
+    spotLight.intensity = 3 * abletonMusicData;
+    pointLight.intensity = 3 * abletonMusicData;
   }
 
   //shaders
