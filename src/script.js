@@ -253,7 +253,7 @@ function positionSpheres() {
     }
   }
 
-  sphereGroup.position.set(-26, 0, 0);
+  sphereGroup.position.set(-26, -6, 0);
 }
 //positionSpheres();
 
@@ -488,7 +488,7 @@ function moveSphereWave() {
       const s = spheres[i];
       const z = s.position;
       gsap.to(z, 0.2, {
-        y: p / 30
+        y: p / 20
       });
     }
   }
