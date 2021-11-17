@@ -663,6 +663,8 @@ function updateShader(data, max, min) {
 
 //remove scene attempt
 
+selectSongDV.style.display = "none";
+
 var sceneBool = true;
 
 function clearScene() {
@@ -675,15 +677,18 @@ function clearScene() {
       scene.add(particles);
       sphereGroup.visible = true;
       scene.background = new THREE.Color(0x6e6e6e);
+      selectSongDV.style.display = "block";
     } else {
       scene.add(particles);
       scene.background = new THREE.Color(0x6e6e6e);
+      selectSongDV.style.display = "block";
       positionSpheres();
     }
   } else if (sceneBool) {
     scene.add(sphere, cube1, torus, plane, floor, plane2, ball);
     scene.remove(particles);
     sphereGroup.visible = false;
+    selectSongDV.style.display = "none";
     scene.background = new THREE.Color(0x00ffa4);
   }
 }
