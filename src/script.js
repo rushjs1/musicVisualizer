@@ -22,9 +22,10 @@ import perlinColorFragmentShader from "./shaders/perlinColor/fragment.glsl";
 import { io } from "socket.io-client";
 
 const gui = new dat.GUI({ width: 340 });
-
+gui.closed = true;
 const debugObject = {};
 const perlinDebugObject = {};
+const sphereColorObject = {};
 
 //import SimplexNoise from "simplex-noise";
 
@@ -82,14 +83,6 @@ const particles = new THREE.Points(particlesGeo, partMat);
 
 const planeGeo = new THREE.PlaneGeometry(1, 1, 32, 32);
 
-const planeCount = planeGeo.attributes.position.count;
-const randomPlane = new Float32Array(planeCount);
-for (let i = 0; i < planeCount; i++) {
-  randomPlane[i] = Math.random();
-}
-
-planeGeo.setAttribute("aRandom", new THREE.BufferAttribute(randomPlane, 1));
-
 const shaderOneMaterial = new THREE.RawShaderMaterial({
   vertexShader: planeVertexShader,
   fragmentShader: planeFragmentShader,
@@ -104,12 +97,12 @@ const shaderOneMaterial = new THREE.RawShaderMaterial({
 const material = new THREE.MeshStandardMaterial();
 material.roughness = 0.4;
 perlinDebugObject.surfaceColor = "#0087ff";
-perlinDebugObject.depthColor = "#88949d";
+//perlinDebugObject.depthColor = "#88949d";
+perlinDebugObject.depthColor = "#000000";
 
 const perlinColorShaderMaterial = new THREE.ShaderMaterial({
   fragmentShader: perlinColorFragmentShader,
   vertexShader: perlinColorVertexShader,
-
   uniforms: {
     uTime: { value: 0 },
     uBigWavesElevation: { value: 0.2 },
@@ -160,12 +153,12 @@ const floorMaterial = new THREE.ShaderMaterial({
   }
 });
 
-const floorGeo = new THREE.PlaneGeometry(5, 5);
-const plane2geo = new THREE.PlaneGeometry(6, 10, 128, 128);
+const plane2geo = new THREE.PlaneGeometry(40, 7, 128, 128);
+const plane3geo = new THREE.PlaneGeometry(40, 40, 128, 128);
 
 /* spiked floor */
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(12, 20, 128, 128),
+  new THREE.PlaneGeometry(40, 40, 128, 128),
   floorMaterial
 );
 
@@ -175,9 +168,21 @@ const floor = new THREE.Mesh(
 floor.rotation.x = -Math.PI * 0.5;
 floor.position.y = -0.65;
 
+//walls
 const plane2 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
-plane2.position.z = -2;
-plane2.position.y = 1;
+
+plane2.position.set(0, 2.5, -20);
+const plane4 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
+plane4.position.set(20, 2.5, 0);
+plane4.rotation.y = -Math.PI * 0.5;
+const plane5 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
+plane5.position.set(-20, 2.5, 0);
+plane5.rotation.y = Math.PI * 0.5;
+
+//const celing
+const plane3 = new THREE.Mesh(plane3geo, perlinColorShaderMaterial);
+plane3.position.set(0, 6, 0);
+plane3.rotation.x = Math.PI * 0.5;
 
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(2, 32, 32),
@@ -223,6 +228,8 @@ selectSongDV.addEventListener("change", () => {
 
 ///group of spheres for viz
 const sphereGroup = new THREE.Object3D();
+sphereColorObject.color1 = "#4b12b3";
+let sMaterial;
 const spheres = [];
 let sWidth = 64;
 function createSphere(geo, mat) {
@@ -233,8 +240,16 @@ function createSphere(geo, mat) {
 
 function positionSpheres() {
   const sGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-  const sMaterial = new THREE.MeshPhongMaterial({
-    color: 0x4b12b3,
+  /*  sMaterial = new THREE.MeshPhongMaterial({
+    color: sphereColorObject.color1,
+    specular: 0xffffff,
+    shininess: 100,
+    emissive: 0x0,
+    flatShading: THREE.SmoothShading,
+    side: THREE.DoubleSide
+  }); */
+  sMaterial = new THREE.MeshBasicMaterial({
+    color: sphereColorObject.color1,
     specular: 0xffffff,
     shininess: 100,
     emissive: 0x0,
@@ -302,7 +317,17 @@ function runInfinity() {
 }
 
 //scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
-scene.add(sphere, plane, floor, plane2, ball, sphereGroup);
+scene.add(
+  sphere,
+  plane,
+  floor,
+  plane2,
+  plane3,
+  plane4,
+  plane5,
+  ball,
+  sphereGroup
+);
 
 ///gui
 
@@ -361,6 +386,12 @@ gui
     perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set(
       perlinDebugObject.surfaceColor
     );
+  });
+gui
+  .addColor(sphereColorObject, "color1")
+  .name("color1")
+  .onChange(() => {
+    sMaterial.color.set(sphereColorObject.color1);
   });
 /* gui
   .add(floorMaterial.uniforms.uColorOffset, "value")
@@ -478,7 +509,10 @@ window.addEventListener("touchend", event => {
     sound.pause();
   }
 });
-
+const afDV = document.getElementById("average-frequency");
+let averageFrequencyForColorChange = {
+  value: 100
+};
 function moveSphereWave() {
   if (sound && sound.isPlaying) {
     analyser.getFrequencyData(soundDataArray);
@@ -508,6 +542,7 @@ console.log(Math.floor(Math.random() * 16777215).toString(16));
 
 let randomThreeColor = new THREE.Color(0xffffff);
 let randomThreeColor2 = new THREE.Color(0xffffff);
+let randomThreeColor3 = new THREE.Color(0xffffff);
 
 //postprocessing effects
 const composer = new EffectComposer(renderer);
@@ -521,7 +556,7 @@ renderer.toneMappingExposure = 0.4;
 const glitchPass = new GlitchPass();
 //composer.addPass(glitchPass);
 
-gui
+/* gui
   .add(renderer, "toneMappingExposure")
   .min(0)
   .max(1)
@@ -533,9 +568,20 @@ gui
   .min(0)
   .max(1)
   .step(0.001)
-  .name("bloomStrength");
+  .name("bloomStrength"); */
+gui
+  .add(averageFrequencyForColorChange, "value")
+  .min(70)
+  .max(120)
+  .step(1)
+  .name("ColorChangeValue");
 
-console.log(bloomPass);
+afDV.textContent = "Average Frequency: ";
+const item = document.createElement("p");
+function logAf(data) {
+  item.textContent = data;
+  afDV.appendChild(item);
+}
 
 ///animations///
 const clock = new THREE.Clock();
@@ -547,8 +593,15 @@ const tick = () => {
 
   moveSphereWave();
 
-  //soundData = analyser.getAverageFrequency();
-
+  soundData = analyser.getAverageFrequency();
+  logAf(soundData);
+  if (soundData > averageFrequencyForColorChange.value) {
+    const randomColorHex3 = Math.floor(Math.random() * 16777215).toString(16);
+    let newColor3 = `#${randomColorHex3}`;
+    randomThreeColor3.set(newColor3);
+    console.log(randomThreeColor3);
+    sMaterial.color.set(randomThreeColor3);
+  }
   //console.log(soundData);
 
   //update controls
@@ -672,24 +725,46 @@ function clearScene() {
   sceneBool = !sceneBool;
   console.log(sceneBool);
   if (!sceneBool) {
-    scene.remove(sphere, cube1, torus, plane, floor, plane2, ball);
+    scene.remove(
+      sphere,
+      cube1,
+      torus,
+      plane,
+      floor,
+      plane2,
+      plane3,
+      plane4,
+      plane5,
+      ball
+    );
     if (!sphereGroup.visible) {
       scene.add(particles);
       sphereGroup.visible = true;
-      scene.background = new THREE.Color(0x6e6e6e);
+      //scene.background = new THREE.Color(0x6e6e6e);
       selectSongDV.style.display = "block";
     } else {
       scene.add(particles);
-      scene.background = new THREE.Color(0x6e6e6e);
+      // scene.background = new THREE.Color(0x6e6e6e);
       selectSongDV.style.display = "block";
       positionSpheres();
     }
   } else if (sceneBool) {
-    scene.add(sphere, cube1, torus, plane, floor, plane2, ball);
+    scene.add(
+      sphere,
+      cube1,
+      torus,
+      plane,
+      floor,
+      plane2,
+      plane3,
+      plane4,
+      plane5,
+      ball
+    );
     scene.remove(particles);
     sphereGroup.visible = false;
     selectSongDV.style.display = "none";
-    scene.background = new THREE.Color(0x00ffa4);
+    // scene.background = new THREE.Color(0x00ffa4);
   }
 }
 

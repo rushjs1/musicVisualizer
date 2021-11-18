@@ -11,13 +11,6 @@
     <title>Capstone Visualizer</title>
   </head>
   <body>
-    <!--   <div class="container">
-      <audio
-        id="source"
-        src="../static/bensound-energy2.mp3"
-        controls=""
-      ></audio>
-    </div> -->
     <div class="options-parent">
       <div class="clear-scene-btn">
         **Toggle Scene**
@@ -46,12 +39,18 @@
               >The Giving Moon - California Sun</option
             >
           </optgroup>
+          <optgroup label="Piano">
+            <option value="chopin1">
+              Chopin - Nocturne in E Flat Major (Op. 9 No. 2)</option
+            >
+          </optgroup>
         </select>
+        <div id="average-frequency"></div>
       </div>
     </div>
 
     <canvas class="webGL"> </canvas>
-    <canvas class="webgl2"></canvas>
+
     <!-- <script src="http://localhost:8080/socket.io/socket.io.js"></script> -->
   </body>
 </html>
