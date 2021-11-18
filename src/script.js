@@ -13,6 +13,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import planeVertexShader from "./shaders/flag/vertex.glsl";
 import planeFragmentShader from "./shaders/flag/fragment.glsl";
 import floorVertexShader from "./shaders/floor/vertex.glsl";
@@ -42,24 +43,48 @@ const sizes = {
 const textureLoader = new THREE.TextureLoader();
 const soicTexture = textureLoader.load("/shaderTextures/soicMask1.jpeg");
 const particleTexture = textureLoader.load("/particles/1.png");
-
+///marble
+const marbleColorTexture = textureLoader.load("/textures/marble/color.jpg");
+const marbleDispTexture = textureLoader.load("textures/marble/disp.jpg");
+const marbleNormalTexture = textureLoader.load("/textures/marble/normal.jpg");
+const marbleSpecTexture = textureLoader.load("/textures/marble/spec.jpg");
+const marbleOccTexture = textureLoader.load("/textures/marble/occ.jpg");
+//tiles
+const tileColorTexture = textureLoader.load("/textures/tiles/color.jpg");
+const tileHeightTexture = textureLoader.load("/textures/tiles/height.png");
+const tileNormalTexture = textureLoader.load("/textures/tiles/normal.jpg");
+const tileRoughTexture = textureLoader.load("/textures/tiles/rough.jpg");
+const tileOccTexture = textureLoader.load("/textures/tiles/occ.jpg");
 //model loader
 
 ////lights
-const hemisphericLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3);
+let spotLightx = 4;
+const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
 scene.add(hemisphericLight);
 const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
 rectAreaLight.position.set(-1.5, 0, 1.5);
 scene.add(rectAreaLight);
 rectAreaLight.lookAt(new Vector3());
-
-//light helpers - frames
-
 const pointLight = new THREE.PointLight(0xff9000, 1, 4.5);
 pointLight.position.set(-1, -0.5, 1);
 const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
 spotLight.position.set(0, 2, 3);
-scene.add(spotLight, pointLight);
+const spotLight2 = new THREE.SpotLight(0xffffff, 2, 10, Math.PI * 0.25);
+spotLight2.position.set(spotLightx, 6, 5);
+scene.add(spotLight, pointLight, spotLight2);
+
+//light helpers - frames
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.2);
+scene.add(pointLightHelper);
+const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
+
+scene.add(spotLightHelper, spotLightHelper2);
+window.requestAnimationFrame(() => {
+  spotLightHelper.update();
+  spotLightHelper2.update();
+});
 
 //particles
 const particlesGeo = new THREE.BufferGeometry();
@@ -81,7 +106,7 @@ const partMat = new THREE.PointsMaterial({
 
 const particles = new THREE.Points(particlesGeo, partMat);
 
-const planeGeo = new THREE.PlaneGeometry(1, 1, 32, 32);
+const planeGeo = new THREE.PlaneGeometry(2, 2, 32, 32);
 
 const shaderOneMaterial = new THREE.RawShaderMaterial({
   vertexShader: planeVertexShader,
@@ -97,8 +122,8 @@ const shaderOneMaterial = new THREE.RawShaderMaterial({
 const material = new THREE.MeshStandardMaterial();
 material.roughness = 0.4;
 perlinDebugObject.surfaceColor = "#0087ff";
-//perlinDebugObject.depthColor = "#88949d";
-perlinDebugObject.depthColor = "#000000";
+perlinDebugObject.depthColor = "#88949d";
+//perlinDebugObject.depthColor = "#000000";
 
 const perlinColorShaderMaterial = new THREE.ShaderMaterial({
   fragmentShader: perlinColorFragmentShader,
@@ -184,6 +209,39 @@ const plane3 = new THREE.Mesh(plane3geo, perlinColorShaderMaterial);
 plane3.position.set(0, 6, 0);
 plane3.rotation.x = Math.PI * 0.5;
 
+//marble floor
+const tileFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(40, 40),
+  new THREE.MeshStandardMaterial({
+    map: tileColorTexture,
+    aoMap: tileOccTexture,
+    normalMap: tileNormalTexture,
+    displacementMap: tileHeightTexture,
+    displacementScale: 0.6,
+    roughnessMap: tileRoughTexture
+  })
+);
+tileFloor.position.y = -0.8;
+tileFloor.rotation.x = -Math.PI * 0.5;
+tileColorTexture.repeat.set(8, 8);
+tileOccTexture.repeat.set(8, 8);
+tileRoughTexture.repeat.set(8, 8);
+tileHeightTexture.repeat.set(8, 8);
+tileNormalTexture.repeat.set(8, 8);
+
+//S Wrapping
+tileColorTexture.wrapS = THREE.RepeatWrapping;
+tileOccTexture.wrapS = THREE.RepeatWrapping;
+tileRoughTexture.wrapS = THREE.RepeatWrapping;
+tileHeightTexture.wrapS = THREE.RepeatWrapping;
+tileNormalTexture.wrapS = THREE.RepeatWrapping;
+//t wrapping
+tileColorTexture.wrapT = THREE.RepeatWrapping;
+tileOccTexture.wrapT = THREE.RepeatWrapping;
+tileRoughTexture.wrapT = THREE.RepeatWrapping;
+tileHeightTexture.wrapT = THREE.RepeatWrapping;
+tileNormalTexture.wrapT = THREE.RepeatWrapping;
+
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(2, 32, 32),
   perlinColorShaderMaterial
@@ -206,13 +264,21 @@ const torus = new THREE.Mesh(
 
 torus.position.x = 1.5;
 
-const plane = new THREE.Mesh(planeGeo, shaderOneMaterial);
+const flagPole = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.1, 0.1, 9.5, 32),
+  new THREE.MeshBasicMaterial({
+    color: 0x000000
+  })
+);
+flagPole.position.x = -3.9;
+flagPole.position.z = 2.5;
 
+const plane = new THREE.Mesh(planeGeo, shaderOneMaterial);
 plane.scale.y = 2 / 3;
-plane.position.z = 0;
-plane.position.y = 1;
-plane.position.x = -1;
-plane.rotation.y = 0.9;
+plane.position.z = 2;
+plane.position.y = 4;
+plane.position.x = -3;
+plane.rotation.y = 0.6;
 
 //get selected song
 const selectSongDV = document.getElementById("song-select");
@@ -228,7 +294,7 @@ selectSongDV.addEventListener("change", () => {
 
 ///group of spheres for viz
 const sphereGroup = new THREE.Object3D();
-sphereColorObject.color1 = "#4b12b3";
+sphereColorObject.color1 = "#340c7d";
 let sMaterial;
 const spheres = [];
 let sWidth = 64;
@@ -320,11 +386,13 @@ function runInfinity() {
 scene.add(
   sphere,
   plane,
+  flagPole,
   floor,
   plane2,
   plane3,
   plane4,
   plane5,
+  tileFloor,
   ball,
   sphereGroup
 );
@@ -639,6 +707,7 @@ const tick = () => {
       randomThreeColor
     );
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
+    spotLightx = -abletonMusicData * 0.2;
   } else {
     /*  floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
@@ -650,6 +719,7 @@ const tick = () => {
     //bloomPass.strength = 0.2;
     spotLight.intensity = 3 * abletonMusicData;
     pointLight.intensity = 3 * abletonMusicData;
+    spotLightx = abletonMusicData * 0.2;
   }
 
   //shaders
@@ -687,8 +757,8 @@ const tick = () => {
 
   ///camera
 
-  updateTorus(soundData, 60, 30);
-  updateShader(abletonMusicData, 160, 130);
+  //updateTorus(soundData, 60, 30);
+  //updateShader(abletonMusicData, 160, 130);
 
   //render
   //renderer.render(scene, camera);
@@ -703,17 +773,6 @@ const tick = () => {
 tick();
 
 //helpers
-function updateTorus(data, max, min) {
-  const newVal = (data - min) / (max - min);
-  torus.rotation.y = 2 * newVal;
-  spotLight.intensity = 1 * newVal;
-  pointLight.intensity = 0.4 * newVal;
-}
-function updateShader(data, max, min) {
-  const newVal = (data - min) / (max - min);
-  shaderOneMaterial.uniforms.uColor[0] = newVal * 2;
-}
-
 //remove scene attempt
 
 selectSongDV.style.display = "none";
@@ -727,44 +786,51 @@ function clearScene() {
   if (!sceneBool) {
     scene.remove(
       sphere,
-      cube1,
-      torus,
       plane,
+      flagPole,
       floor,
       plane2,
       plane3,
       plane4,
       plane5,
-      ball
+      ball,
+      tileFloor,
+      spotLightHelper,
+      spotLightHelper2,
+      pointLightHelper
     );
     if (!sphereGroup.visible) {
       scene.add(particles);
       sphereGroup.visible = true;
-      //scene.background = new THREE.Color(0x6e6e6e);
+      scene.background = new THREE.Color(0x6e6e6e);
       selectSongDV.style.display = "block";
     } else {
       scene.add(particles);
-      // scene.background = new THREE.Color(0x6e6e6e);
+      scene.background = new THREE.Color(0x6e6e6e);
       selectSongDV.style.display = "block";
       positionSpheres();
     }
   } else if (sceneBool) {
     scene.add(
       sphere,
-      cube1,
-      torus,
+
       plane,
       floor,
       plane2,
       plane3,
       plane4,
       plane5,
-      ball
+      ball,
+      tileFloor,
+      flagPole,
+      spotLightHelper,
+      spotLightHelper2,
+      pointLightHelper
     );
     scene.remove(particles);
     sphereGroup.visible = false;
     selectSongDV.style.display = "none";
-    // scene.background = new THREE.Color(0x00ffa4);
+    scene.background = new THREE.Color(0x000000);
   }
 }
 
