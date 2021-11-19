@@ -57,6 +57,8 @@ const tileRoughTexture = textureLoader.load("/textures/tiles/rough.jpg");
 const tileOccTexture = textureLoader.load("/textures/tiles/occ.jpg");
 //model loader
 
+let plane4, plane5;
+
 ////lights
 let spotLightx = 4;
 const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
@@ -71,19 +73,28 @@ const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
 spotLight.position.set(0, 2, 3);
 const spotLight2 = new THREE.SpotLight(0xffffff, 2, 10, Math.PI * 0.25);
 spotLight2.position.set(spotLightx, 6, 5);
+const spotLight3 = new THREE.SpotLight(0xf2e0b9, 2, 10, Math.PI * 0.15);
+spotLight3.position.set(8, 4, 0);
 scene.add(spotLight, pointLight, spotLight2);
 
 //light helpers - frames
 
 const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.2);
-scene.add(pointLightHelper);
+
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
 const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
+const spotLightHelper3 = new THREE.SpotLightHelper(spotLight3);
 
-scene.add(spotLightHelper, spotLightHelper2);
+scene.add(
+  pointLightHelper,
+  spotLightHelper,
+  spotLightHelper2,
+  spotLightHelper3
+);
 window.requestAnimationFrame(() => {
   spotLightHelper.update();
   spotLightHelper2.update();
+  spotLightHelper3.update();
 });
 
 //particles
@@ -197,10 +208,10 @@ floor.position.y = -0.65;
 const plane2 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
 
 plane2.position.set(0, 2.5, -20);
-const plane4 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
+plane4 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
 plane4.position.set(20, 2.5, 0);
 plane4.rotation.y = -Math.PI * 0.5;
-const plane5 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
+plane5 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
 plane5.position.set(-20, 2.5, 0);
 plane5.rotation.y = Math.PI * 0.5;
 
@@ -383,6 +394,8 @@ function runInfinity() {
 }
 
 //scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
+spotLight3.target = plane4;
+
 scene.add(
   sphere,
   plane,
@@ -394,7 +407,8 @@ scene.add(
   plane5,
   tileFloor,
   ball,
-  sphereGroup
+  sphereGroup,
+  spotLight3.target
 );
 
 ///gui
