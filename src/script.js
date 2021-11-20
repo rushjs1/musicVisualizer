@@ -577,20 +577,6 @@ function loadThreeAudio(song) {
 }
 loadThreeAudio(selectedSong);
 
-window.addEventListener("keypress", event => {
-  if (sound && !sound.isPlaying) {
-    sound.play();
-  } else {
-    sound.pause();
-  }
-});
-window.addEventListener("touchend", event => {
-  if (sound && !sound.isPlaying) {
-    sound.play();
-  } else {
-    sound.pause();
-  }
-});
 const afDV = document.getElementById("average-frequency");
 let averageFrequencyForColorChange = {
   value: 100
@@ -811,7 +797,8 @@ function clearScene() {
       tileFloor,
       spotLightHelper,
       spotLightHelper2,
-      pointLightHelper
+      pointLightHelper,
+      spotLightHelper3
     );
     if (!sphereGroup.visible) {
       scene.add(particles);
@@ -823,6 +810,21 @@ function clearScene() {
       scene.background = new THREE.Color(0x6e6e6e);
       selectSongDV.style.display = "block";
       positionSpheres();
+
+      window.addEventListener("keypress", event => {
+        if (sound && !sound.isPlaying) {
+          sound.play();
+        } else {
+          sound.pause();
+        }
+      });
+      window.addEventListener("touchend", event => {
+        if (sound && !sound.isPlaying) {
+          sound.play();
+        } else {
+          sound.pause();
+        }
+      });
     }
   } else if (sceneBool) {
     scene.add(
@@ -839,6 +841,7 @@ function clearScene() {
       flagPole,
       spotLightHelper,
       spotLightHelper2,
+      spotLightHelper3,
       pointLightHelper
     );
     scene.remove(particles);
