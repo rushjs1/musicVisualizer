@@ -74,7 +74,7 @@ spotLight.position.set(0, 2, 3);
 const spotLight2 = new THREE.SpotLight(0xffffff, 2, 10, Math.PI * 0.25);
 spotLight2.position.set(spotLightx, 6, 5);
 const spotLight3 = new THREE.SpotLight(0xf2e0b9, 2, 10, Math.PI * 0.15);
-spotLight3.position.set(8, 4, 0);
+spotLight3.position.set(-4, 2, 4);
 scene.add(spotLight, pointLight, spotLight2);
 
 //light helpers - frames
@@ -394,7 +394,7 @@ function runInfinity() {
 }
 
 //scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
-spotLight3.target = plane4;
+//spotLight3.target = plane3;
 
 scene.add(
   sphere,
@@ -408,7 +408,7 @@ scene.add(
   tileFloor,
   ball,
   sphereGroup,
-  spotLight3.target
+  spotLight3
 );
 
 ///gui
