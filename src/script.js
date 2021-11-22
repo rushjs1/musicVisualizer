@@ -1,5 +1,5 @@
 import "./styles.css";
-
+import Experience from "./Experience/Experience.js";
 import * as THREE from "three";
 import * as dat from "dat.gui";
 import { TweenMax } from "gsap";
@@ -22,6 +22,10 @@ import perlinColorVertexShader from "./shaders/perlinColor/vertex.glsl";
 import perlinColorFragmentShader from "./shaders/perlinColor/fragment.glsl";
 import { io } from "socket.io-client";
 
+//exp test
+const experience = new Experience(document.querySelector("canvas.webGL"));
+
+//
 const gui = new dat.GUI({ width: 340 });
 gui.closed = true;
 const debugObject = {};
@@ -596,6 +600,10 @@ function moveSphereWave() {
   }
 }
 
+function moveCamera() {
+  gsap.to(camera.position, { x: camera.position.x + 2 });
+}
+
 let abletonMusicData = null;
 //socket io && ableton
 var socket = io();
@@ -669,6 +677,7 @@ const tick = () => {
     randomThreeColor3.set(newColor3);
     console.log(randomThreeColor3);
     sMaterial.color.set(randomThreeColor3);
+    moveCamera();
   }
   //console.log(soundData);
 
