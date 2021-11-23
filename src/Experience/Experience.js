@@ -27,6 +27,10 @@ export default class Experience {
     });
   }
 
-  resize() {}
-  update() {}
+  resize() {
+    console.log("resize");
+  }
+  update() {
+    console.log("update");
+  }
 }
