@@ -677,7 +677,7 @@ const tick = () => {
     randomThreeColor3.set(newColor3);
     console.log(randomThreeColor3);
     sMaterial.color.set(randomThreeColor3);
-    moveCamera();
+    //moveCamera();
   }
   //console.log(soundData);
 
