@@ -2,7 +2,6 @@ import "./styles.css";
 import Experience from "./Experience/Experience.js";
 import * as THREE from "three";
 import * as dat from "dat.gui";
-import { TweenMax } from "gsap";
 import { gsap } from "gsap";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -557,10 +556,6 @@ function loadThreeAudio(song) {
   let audioLoader = null;
   if (sound && sound.isPlaying) {
     sound.pause();
-    /*   sound = null;
-    soundDataArray = null;
-    bufferLength = null;
-    analyser = null; */
   }
 
   listener = new THREE.AudioListener();
