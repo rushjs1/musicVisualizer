@@ -30,6 +30,7 @@ gui.closed = true;
 const debugObject = {};
 const perlinDebugObject = {};
 const sphereColorObject = {};
+let cameraObject = {};
 
 //import SimplexNoise from "simplex-noise";
 
@@ -527,6 +528,9 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.x = 1;
 camera.position.y = 1;
 camera.position.z = 8;
+cameraObject = {
+  switch: true
+};
 
 scene.add(camera);
 
@@ -640,6 +644,9 @@ gui
   .max(1)
   .step(0.001)
   .name("bloomStrength"); */
+
+gui.add(cameraObject, "switch").name("Rotate Camera");
+
 gui
   .add(averageFrequencyForColorChange, "value")
   .min(70)
@@ -760,6 +767,14 @@ const tick = () => {
   perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
   ///camera
+  const cameraAngle = elapsedTime * 0.5;
+  if (cameraObject.switch) {
+    camera.position.x = Math.cos(cameraAngle) * 22;
+    camera.position.z = Math.sin(cameraAngle) * 22;
+  } else {
+    camera.position.x = camera.position.x;
+    camera.position.z = camera.position.z;
+  }
 
   //updateTorus(soundData, 60, 30);
   //updateShader(abletonMusicData, 160, 130);
