@@ -735,6 +735,7 @@ const tick = () => {
 
   //shaders
   shaderOneMaterial.uniforms.uTime.value = elapsedTime;
+  console.log(elapsedTime);
 
   floorMaterial.uniforms.uTime.value = elapsedTime;
   //floorMaterial.uniforms.uTime.value = soundData * 0.02;

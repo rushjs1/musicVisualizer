@@ -45,5 +45,19 @@ export default class Experience {
   update() {
     this.camera.update();
     // this.renderer.update();
+
+    //threeAudio
+    if (this.world.sound && this.world.sound.isPlaying) {
+      this.world.moveSphereWave();
+    }
+    //ableton
+    if (this.world.abletonMusicData) {
+      this.world.floorShaderMaterial.uniforms.uBigWavesElevation.value = this.world.abletonMusicData;
+      this.world.perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = this.world.abletonMusicData;
+    }
+
+    //flag Shader
+    this.world.flagShaderMaterial.uniforms.uTime.value =
+      (this.time.elapsed * 0.005) / 2;
   }
 }

@@ -31,6 +31,7 @@ export default class World {
     //world bools
     this.isWorldOneInit = false;
     this.isWorldTwoInit = false;
+    this.currentScene = 0;
 
     //world one Objects
     this.testMesh1;
@@ -98,6 +99,7 @@ export default class World {
 
   //WORLD 1
   worldOne() {
+    this.currentScene = 0;
     this.scene.background = new THREE.Color(0x2e2e2e);
     if (!this.isWorldOneInit) {
       this.listenForAbleton();
@@ -251,8 +253,10 @@ export default class World {
       );
     }
     this.isWorldOneInit = true;
+    console.log("Scene:" + this.currentScene);
   }
   worldTwo() {
+    this.currentScene = 1;
     this.scene.background = new THREE.Color(0x6e6e6e);
     if (!this.isWorldTwoInit) {
       this.testMesh2 = new THREE.Mesh(
@@ -307,6 +311,7 @@ export default class World {
       this.sphereGroup.visible = true;
     }
     this.isWorldTwoInit = true;
+    console.log("Scene:" + this.currentScene);
   }
 
   createSphere(geo, mat) {
@@ -391,10 +396,12 @@ export default class World {
       }
     }
   }
+
   listenForAbleton() {
     this.socket = io();
-    this.socket.on("musicEmit", function(msg) {
+    this.socket.on("musicEmit", msg => {
       this.abletonMusicData = msg;
+      
     });
   }
 }
