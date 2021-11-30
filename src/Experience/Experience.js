@@ -52,8 +52,17 @@ export default class Experience {
     }
     //ableton
     if (this.world.abletonMusicData) {
+      // floor Shader
       this.world.floorShaderMaterial.uniforms.uBigWavesElevation.value = this.world.abletonMusicData;
+      this.world.floorShaderMaterial.uniforms.uColorMulti.value = this.world.abletonMusicData;
+      this.world.floorShaderMaterial.uniforms.uColorOffset.value = this.world.abletonMusicData;
+      this.world.floorShaderMaterial.uniforms.uBigWavesSpeed.value = this.world.abletonMusicData;
+
+      ///perlin color shader
       this.world.perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = this.world.abletonMusicData;
+      this.world.perlinColorShaderMaterial.uniforms.uColorMulti.value = this.world.abletonMusicData;
+      this.world.perlinColorShaderMaterial.uniforms.uColorOffset.value = this.world.abletonMusicData;
+      this.world.perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = this.world.abletonMusicData;
     }
 
     //flag Shader
