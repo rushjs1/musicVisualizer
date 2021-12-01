@@ -48,17 +48,44 @@ const textureLoader = new THREE.TextureLoader();
 const soicTexture = textureLoader.load("/shaderTextures/soicMask1.jpeg");
 const particleTexture = textureLoader.load("/particles/1.png");
 ///marble
-const marbleColorTexture = textureLoader.load("/textures/marble/color.jpg");
-const marbleDispTexture = textureLoader.load("textures/marble/disp.jpg");
-const marbleNormalTexture = textureLoader.load("/textures/marble/normal.jpg");
-const marbleSpecTexture = textureLoader.load("/textures/marble/spec.jpg");
-const marbleOccTexture = textureLoader.load("/textures/marble/occ.jpg");
+//const marbleColorTexture = textureLoader.load("/textures/marble/color.jpg");
+//const marbleDispTexture = textureLoader.load("textures/marble/disp.jpg");
+//const marbleNormalTexture = textureLoader.load("/textures/marble/normal.jpg");
+//const marbleSpecTexture = textureLoader.load("/textures/marble/spec.jpg");
+//const marbleOccTexture = textureLoader.load("/textures/marble/occ.jpg");
 //tiles
 const tileColorTexture = textureLoader.load("/textures/tiles/color.jpg");
 const tileHeightTexture = textureLoader.load("/textures/tiles/height.png");
 const tileNormalTexture = textureLoader.load("/textures/tiles/normal.jpg");
 const tileRoughTexture = textureLoader.load("/textures/tiles/rough.jpg");
 const tileOccTexture = textureLoader.load("/textures/tiles/occ.jpg");
+//concrete
+//const concreteColorTexture = textureLoader.load("/textures/concrete/color.jpg");
+//const concreteHeightTexture = textureLoader.load(
+//  "/textures/concrete/height.png"
+//);
+//const concreteNormalTexture = textureLoader.load(
+//  "/textures/concrete/normal.jpg"
+//);
+//const concreteRoughTexture = textureLoader.load(
+//  "/textures/concrete/roughness.jpg"
+//);
+//const concreteOccTexture = textureLoader.load("/textures/concrete/AO.jpg");
+//const concreteMetallicTexture = textureLoader.load(
+//  "/textures/concrete/metallic.jpg"
+//);
+////SCI-FI1
+const scifi1ColorTexture = textureLoader.load(
+  "/textures/sci-fi1/basecolor.jpg"
+);
+const scifi1HeightTexture = textureLoader.load("/textures/sci-fi1/height.png");
+const scifi1NormalTexture = textureLoader.load("/textures/sci-fi1/normal.jpg");
+const scifi1RoughTexture = textureLoader.load(
+  "/textures/sci-fi1/roughness.jpg"
+);
+const scifi1OccTexture = textureLoader.load("/textures/sci-fi1/AO.jpg");
+const scifi1MetalTexture = textureLoader.load("/textures/sci-fi1/metallic.jpg");
+
 //model loader
 
 let plane4, plane5;
@@ -193,12 +220,12 @@ const floorMaterial = new THREE.ShaderMaterial({
   }
 });
 
-const plane2geo = new THREE.PlaneGeometry(40, 7, 128, 128);
-const plane3geo = new THREE.PlaneGeometry(40, 40, 128, 128);
+const plane2geo = new THREE.PlaneGeometry(20, 7, 128, 128);
+const plane3geo = new THREE.PlaneGeometry(20, 20, 128, 128);
 
 /* spiked floor */
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(40, 40, 128, 128),
+  new THREE.PlaneGeometry(20, 20, 128, 128),
   floorMaterial
 );
 
@@ -209,14 +236,43 @@ floor.rotation.x = -Math.PI * 0.5;
 floor.position.y = -0.65;
 
 //walls
-const plane2 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
+const concreteMaterial = new THREE.MeshStandardMaterial({
+  map: scifi1ColorTexture,
+  aoMap: scifi1OccTexture,
+  normalMap: scifi1NormalTexture,
+  displacementMap: scifi1HeightTexture,
+  displacementScale: 0.6,
+  roughnessMap: scifi1RoughTexture,
+  metalnessMap: scifi1MetalTexture
+});
+scifi1ColorTexture.repeat.set(8, 1);
+scifi1OccTexture.repeat.set(8, 1);
+scifi1RoughTexture.repeat.set(8, 1);
+scifi1HeightTexture.repeat.set(8, 1);
+scifi1NormalTexture.repeat.set(8, 1);
 
-plane2.position.set(0, 2.5, -20);
-plane4 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
-plane4.position.set(20, 2.5, 0);
+//S Wrapping
+scifi1ColorTexture.wrapS = THREE.RepeatWrapping;
+scifi1OccTexture.wrapS = THREE.RepeatWrapping;
+scifi1RoughTexture.wrapS = THREE.RepeatWrapping;
+scifi1HeightTexture.wrapS = THREE.RepeatWrapping;
+scifi1NormalTexture.wrapS = THREE.RepeatWrapping;
+scifi1MetalTexture.wrapS = THREE.RepeatWrapping;
+//t wrapping
+scifi1ColorTexture.wrapT = THREE.RepeatWrapping;
+scifi1OccTexture.wrapT = THREE.RepeatWrapping;
+scifi1RoughTexture.wrapT = THREE.RepeatWrapping;
+scifi1HeightTexture.wrapT = THREE.RepeatWrapping;
+scifi1NormalTexture.wrapT = THREE.RepeatWrapping;
+scifi1MetalTexture.wrapT = THREE.RepeatWrapping;
+
+const plane2 = new THREE.Mesh(plane2geo, concreteMaterial);
+plane2.position.set(0, 2.5, -10);
+plane4 = new THREE.Mesh(plane2geo, concreteMaterial);
+plane4.position.set(10, 2.5, 0);
 plane4.rotation.y = -Math.PI * 0.5;
-plane5 = new THREE.Mesh(plane2geo, perlinColorShaderMaterial);
-plane5.position.set(-20, 2.5, 0);
+plane5 = new THREE.Mesh(plane2geo, concreteMaterial);
+plane5.position.set(-10, 2.5, 0);
 plane5.rotation.y = Math.PI * 0.5;
 
 //const celing
@@ -226,7 +282,7 @@ plane3.rotation.x = Math.PI * 0.5;
 
 //marble floor
 const tileFloor = new THREE.Mesh(
-  new THREE.PlaneGeometry(40, 40),
+  new THREE.PlaneGeometry(20, 20),
   new THREE.MeshStandardMaterial({
     map: tileColorTexture,
     aoMap: tileOccTexture,
@@ -243,7 +299,6 @@ tileOccTexture.repeat.set(8, 8);
 tileRoughTexture.repeat.set(8, 8);
 tileHeightTexture.repeat.set(8, 8);
 tileNormalTexture.repeat.set(8, 8);
-
 //S Wrapping
 tileColorTexture.wrapS = THREE.RepeatWrapping;
 tileOccTexture.wrapS = THREE.RepeatWrapping;
@@ -735,7 +790,6 @@ const tick = () => {
 
   //shaders
   shaderOneMaterial.uniforms.uTime.value = elapsedTime;
-  console.log(elapsedTime);
 
   floorMaterial.uniforms.uTime.value = elapsedTime;
   //floorMaterial.uniforms.uTime.value = soundData * 0.02;
@@ -768,14 +822,14 @@ const tick = () => {
   perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
   ///camera
-  const cameraAngle = elapsedTime * 0.5;
+  /*   const cameraAngle = elapsedTime * 0.5;
   if (cameraObject.switch) {
     camera.position.x = Math.cos(cameraAngle) * 22;
     camera.position.z = Math.sin(cameraAngle) * 22;
   } else {
     camera.position.x = camera.position.x;
     camera.position.z = camera.position.z;
-  }
+  } */
 
   //updateTorus(soundData, 60, 30);
   //updateShader(abletonMusicData, 160, 130);

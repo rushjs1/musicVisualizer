@@ -18,6 +18,7 @@ export default class World {
     this.camera = camera.cameraInstance;
     this.renderer = renderer;
     this.gui = new dat.GUI({ width: 340 });
+    this.gui.closed = true;
     //texture Loader
     this.textureLoader = new THREE.TextureLoader();
     //toggle world
@@ -401,7 +402,6 @@ export default class World {
     this.socket = io();
     this.socket.on("musicEmit", msg => {
       this.abletonMusicData = msg;
-      
     });
   }
 }
