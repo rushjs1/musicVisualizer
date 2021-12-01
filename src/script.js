@@ -92,21 +92,23 @@ let plane4, plane5;
 
 ////lights
 let spotLightx = 4;
-const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
-scene.add(hemisphericLight);
-const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
+/* const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
+scene.add(hemisphericLight); */
+/* const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
 rectAreaLight.position.set(-1.5, 0, 1.5);
-scene.add(rectAreaLight);
-rectAreaLight.lookAt(new Vector3());
+scene.add(rectAreaLight); */
+
 const pointLight = new THREE.PointLight(0xff9000, 1, 4.5);
 pointLight.position.set(-1, -0.5, 1);
 const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
-spotLight.position.set(0, 2, 3);
+//spotLight.position.set(0, 2, 3);
 const spotLight2 = new THREE.SpotLight(0xffffff, 2, 10, Math.PI * 0.25);
-spotLight2.position.set(spotLightx, 6, 5);
+//spotLight2.position.set(spotLightx, 6, 5);
 const spotLight3 = new THREE.SpotLight(0xf2e0b9, 2, 10, Math.PI * 0.15);
-spotLight3.position.set(4, 2, 4);
-scene.add(spotLight, pointLight, spotLight2);
+//spotLight3.position.set(4, 2, 4);
+//scene.add(spotLight, pointLight, spotLight2);
+const spotLight4 = new THREE.SpotLight(0x687bcd, 2, 10, Math.PI * 0.25);
+const spotLight5 = new THREE.SpotLight(0x689fe3, 2, 10, Math.PI * 0.15);
 
 //light helpers - frames
 
@@ -115,17 +117,22 @@ const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.2);
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
 const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
 const spotLightHelper3 = new THREE.SpotLightHelper(spotLight3);
-
+const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
+const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
 scene.add(
   pointLightHelper,
   spotLightHelper,
   spotLightHelper2,
-  spotLightHelper3
+  spotLightHelper3,
+  spotLightHelper4,
+  spotLightHelper5
 );
 window.requestAnimationFrame(() => {
   spotLightHelper.update();
   spotLightHelper2.update();
   spotLightHelper3.update();
+  spotLightHelper4.update();
+  spotLightHelper5.update();
 });
 
 //particles
@@ -279,6 +286,11 @@ plane5.rotation.y = Math.PI * 0.5;
 const plane3 = new THREE.Mesh(plane3geo, perlinColorShaderMaterial);
 plane3.position.set(0, 6, 0);
 plane3.rotation.x = Math.PI * 0.5;
+
+plane2.add(spotLight);
+plane3.add(spotLight3, spotLight5);
+plane4.add(spotLight2);
+plane5.add(spotLight4);
 
 //marble floor
 const tileFloor = new THREE.Mesh(
@@ -466,8 +478,7 @@ scene.add(
   plane5,
   tileFloor,
   ball,
-  sphereGroup,
-  spotLight3
+  sphereGroup
 );
 
 ///gui
@@ -872,7 +883,9 @@ function clearScene() {
       spotLightHelper,
       spotLightHelper2,
       pointLightHelper,
-      spotLightHelper3
+      spotLightHelper3,
+      spotLightHelper4,
+      spotLightHelper5
     );
     if (!sphereGroup.visible) {
       scene.add(particles);
