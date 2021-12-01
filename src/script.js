@@ -92,8 +92,8 @@ let plane4, plane5;
 
 ////lights
 let spotLightx = 4;
-/* const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
-scene.add(hemisphericLight); */
+const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
+scene.add(hemisphericLight);
 /* const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
 rectAreaLight.position.set(-1.5, 0, 1.5);
 scene.add(rectAreaLight); */
