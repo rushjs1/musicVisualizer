@@ -784,11 +784,12 @@ const tick = () => {
       randomThreeColor
     );
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
-    spotLightx = -abletonMusicData * 0.2;
+    spotLightx = abletonMusicData * -2;
   } else {
     /*  floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
       soundData * 0.003; */
+
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     bloomPass.strength = abletonMusicData / 3;
@@ -796,7 +797,7 @@ const tick = () => {
     //bloomPass.strength = 0.2;
     spotLight.intensity = 3 * abletonMusicData;
     pointLight.intensity = 3 * abletonMusicData;
-    spotLightx = abletonMusicData * 0.2;
+    spotLightx = abletonMusicData * 2;
   }
 
   //shaders
@@ -810,10 +811,9 @@ const tick = () => {
   /* try with ableton */
   //bloomPass.strength = abletonMusicData / 3;
   floorMaterial.uniforms.uColorMulti.value = abletonMusicData;
-
   floorMaterial.uniforms.uColorOffset.value = abletonMusicData;
-
   floorMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData;
+  spotLight4.intensity = abletonMusicData * 2;
 
   perlinColorShaderMaterial.uniforms.uColorMulti.value = abletonMusicData;
   perlinColorShaderMaterial.uniforms.uColorOffset.value = abletonMusicData;
@@ -944,5 +944,5 @@ clearBtn.addEventListener("click", () => {
   console.log("clear");
   clearScene();
 });
-
+console.log("test");
 console.log("push to both remote origins test");
