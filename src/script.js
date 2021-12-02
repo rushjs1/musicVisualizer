@@ -945,4 +945,5 @@ clearBtn.addEventListener("click", () => {
   clearScene();
 });
 console.log("test");
+console.log("anotherTest");
 console.log("push to both remote origins test");
