@@ -86,29 +86,68 @@ const scifi1RoughTexture = textureLoader.load(
 const scifi1OccTexture = textureLoader.load("/textures/sci-fi1/AO.jpg");
 const scifi1MetalTexture = textureLoader.load("/textures/sci-fi1/metallic.jpg");
 
+//stage textures
+const concertTextureColor = textureLoader.load(
+  "/models/concert_stage/color.tga"
+);
+const concertTextureNormal = textureLoader.load(
+  "/models/concert_stage/normal.tga"
+);
+const concertTextureMetal = textureLoader.load(
+  "/models/concert_stage/metal.tga"
+);
+
 //model loader
+const gltfLoader = new GLTFLoader();
+let stage;
+gltfLoader.load("/models/concert_stage/scene.gltf", gltf => {
+  stage = gltf;
+  stage.scene.scale.set(0.3, 0.3, 0.3);
+  stage.scene.position.set(0, -0.6, -5);
+
+  scene.add(stage.scene);
+});
 
 let plane4, plane5;
 
 ////lights
 let spotLightx = 4;
-const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
-scene.add(hemisphericLight);
+/* const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
+scene.add(hemisphericLight); */
 /* const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
 rectAreaLight.position.set(-1.5, 0, 1.5);
 scene.add(rectAreaLight); */
 
 const pointLight = new THREE.PointLight(0xff9000, 1, 4.5);
 pointLight.position.set(-1, -0.5, 1);
-const spotLight = new THREE.SpotLight(0x78ff00, 3, 5, Math.PI * 0.1, 0.25, 1);
-//spotLight.position.set(0, 2, 3);
-const spotLight2 = new THREE.SpotLight(0xffffff, 2, 10, Math.PI * 0.25);
+const spotLight = new THREE.SpotLight(0x689fe3, 5, 18, Math.PI * 0.13);
+spotLight.target.position.x = 4;
+spotLight.target.position.z = 4;
+const spotLight2 = new THREE.SpotLight(0xffffff, 2, 30, Math.PI * 0.15, 0.25);
+spotLight2.target.position.z = -4;
+
 //spotLight2.position.set(spotLightx, 6, 5);
-const spotLight3 = new THREE.SpotLight(0xf2e0b9, 2, 10, Math.PI * 0.15);
+const spotLight3 = new THREE.SpotLight(0xf2e0b9, 2, 30, Math.PI * 0.15);
+spotLight3.target.position.z = -4;
+spotLight3.target.position.x = 6;
+
 //spotLight3.position.set(4, 2, 4);
 //scene.add(spotLight, pointLight, spotLight2);
-const spotLight4 = new THREE.SpotLight(0x687bcd, 2, 10, Math.PI * 0.25);
-const spotLight5 = new THREE.SpotLight(0x689fe3, 2, 10, Math.PI * 0.15);
+const spotLight4 = new THREE.SpotLight(0x687bcd, 2, 10, Math.PI * 0.15);
+const spotLight5 = new THREE.SpotLight(0x689fe3, 2, 30, Math.PI * 0.15);
+spotLight5.target.position.z = -10;
+spotLight5.target.position.x = -6;
+const spotLight6 = new THREE.SpotLight(0x7368e3, 5, 18, Math.PI * 0.13);
+spotLight6.target.position.x = -4;
+spotLight6.target.position.z = 4;
+
+scene.add(
+  spotLight5.target,
+  spotLight3.target,
+  spotLight2.target,
+  spotLight.target,
+  spotLight6.target
+);
 
 //light helpers - frames
 
@@ -119,13 +158,15 @@ const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
 const spotLightHelper3 = new THREE.SpotLightHelper(spotLight3);
 const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
 const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
+const spotLightHelper6 = new THREE.SpotLightHelper(spotLight6);
 scene.add(
   pointLightHelper,
   spotLightHelper,
   spotLightHelper2,
   spotLightHelper3,
   spotLightHelper4,
-  spotLightHelper5
+  spotLightHelper5,
+  spotLightHelper6
 );
 window.requestAnimationFrame(() => {
   spotLightHelper.update();
@@ -133,6 +174,7 @@ window.requestAnimationFrame(() => {
   spotLightHelper3.update();
   spotLightHelper4.update();
   spotLightHelper5.update();
+  spotLightHelper6.update();
 });
 
 //particles
@@ -227,12 +269,12 @@ const floorMaterial = new THREE.ShaderMaterial({
   }
 });
 
-const plane2geo = new THREE.PlaneGeometry(20, 7, 128, 128);
-const plane3geo = new THREE.PlaneGeometry(20, 20, 128, 128);
+const plane2geo = new THREE.PlaneGeometry(20, 11.1, 128, 128);
+const plane3geo = new THREE.PlaneGeometry(20, 30, 128, 128);
 
 /* spiked floor */
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(20, 20, 128, 128),
+  new THREE.PlaneGeometry(20, 30, 128, 128),
   floorMaterial
 );
 
@@ -274,27 +316,30 @@ scifi1NormalTexture.wrapT = THREE.RepeatWrapping;
 scifi1MetalTexture.wrapT = THREE.RepeatWrapping;
 
 const plane2 = new THREE.Mesh(plane2geo, concreteMaterial);
-plane2.position.set(0, 2.5, -10);
+plane2.position.set(0, 5, -10);
 plane4 = new THREE.Mesh(plane2geo, concreteMaterial);
-plane4.position.set(10, 2.5, 0);
+plane4.position.set(10, 5, 0);
 plane4.rotation.y = -Math.PI * 0.5;
 plane5 = new THREE.Mesh(plane2geo, concreteMaterial);
-plane5.position.set(-10, 2.5, 0);
+plane5.position.set(-10, 5, 0);
 plane5.rotation.y = Math.PI * 0.5;
 
 //const celing
 const plane3 = new THREE.Mesh(plane3geo, perlinColorShaderMaterial);
-plane3.position.set(0, 6, 0);
+plane3.position.set(0, 10, 0);
 plane3.rotation.x = Math.PI * 0.5;
 
-plane2.add(spotLight);
+plane2.add(spotLight, spotLight6);
 plane3.add(spotLight3, spotLight5);
 plane4.add(spotLight2);
 plane5.add(spotLight4);
+spotLight4.intensity = 2;
+spotLight.position.set(2.7, 2.6, 4.2);
+spotLight6.position.set(-2.7, 2.6, 4.2);
 
 //marble floor
 const tileFloor = new THREE.Mesh(
-  new THREE.PlaneGeometry(20, 20),
+  new THREE.PlaneGeometry(20, 30),
   new THREE.MeshStandardMaterial({
     map: tileColorTexture,
     aoMap: tileOccTexture,
@@ -684,7 +729,7 @@ console.log(Math.floor(Math.random() * 16777215).toString(16));
 let randomThreeColor = new THREE.Color(0xffffff);
 let randomThreeColor2 = new THREE.Color(0xffffff);
 let randomThreeColor3 = new THREE.Color(0xffffff);
-
+let randomThreeColor4 = new THREE.Color(0xffffff);
 //postprocessing effects
 const composer = new EffectComposer(renderer);
 let renderPass = new RenderPass(scene, camera);
@@ -741,10 +786,15 @@ const tick = () => {
   logAf(soundData);
   if (soundData > averageFrequencyForColorChange.value) {
     const randomColorHex3 = Math.floor(Math.random() * 16777215).toString(16);
+    const randomColorHex4 = Math.floor(Math.random() * 16777215).toString(16);
     let newColor3 = `#${randomColorHex3}`;
+    let newColor4 = `#${randomColorHex4}`;
     randomThreeColor3.set(newColor3);
+    randomThreeColor4.set(newColor4);
     console.log(randomThreeColor3);
     sMaterial.color.set(randomThreeColor3);
+    spotLight6.color.set(randomThreeColor3);
+    spotLight.color.set(randomThreeColor4);
     //moveCamera();
   }
   //console.log(soundData);
@@ -784,7 +834,7 @@ const tick = () => {
       randomThreeColor
     );
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
-    spotLightx = abletonMusicData * -2;
+    // spotLightx = abletonMusicData * -2;
   } else {
     /*  floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
@@ -795,9 +845,9 @@ const tick = () => {
     bloomPass.strength = abletonMusicData / 3;
     glitchPass.goWild = false;
     //bloomPass.strength = 0.2;
-    spotLight.intensity = 3 * abletonMusicData;
-    pointLight.intensity = 3 * abletonMusicData;
-    spotLightx = abletonMusicData * 2;
+    //spotLight.intensity = 30 * abletonMusicData;
+    //pointLight.intensity = 3 * abletonMusicData;
+    //  spotLightx = abletonMusicData * 2;
   }
 
   //shaders
@@ -813,7 +863,7 @@ const tick = () => {
   floorMaterial.uniforms.uColorMulti.value = abletonMusicData;
   floorMaterial.uniforms.uColorOffset.value = abletonMusicData;
   floorMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData;
-  spotLight4.intensity = abletonMusicData * 2;
+  //spotLight4.intensity = abletonMusicData * 2;
 
   perlinColorShaderMaterial.uniforms.uColorMulti.value = abletonMusicData;
   perlinColorShaderMaterial.uniforms.uColorOffset.value = abletonMusicData;
@@ -844,6 +894,9 @@ const tick = () => {
 
   //updateTorus(soundData, 60, 30);
   //updateShader(abletonMusicData, 160, 130);
+
+  spotLight.intensity = soundData * 0.05;
+  spotLight6.intensity = soundData * 0.05;
 
   //render
   //renderer.render(scene, camera);
@@ -885,7 +938,9 @@ function clearScene() {
       pointLightHelper,
       spotLightHelper3,
       spotLightHelper4,
-      spotLightHelper5
+      spotLightHelper5,
+      spotLightHelper6,
+      stage.scene
     );
     if (!sphereGroup.visible) {
       scene.add(particles);
@@ -929,7 +984,11 @@ function clearScene() {
       spotLightHelper,
       spotLightHelper2,
       spotLightHelper3,
-      pointLightHelper
+      spotLightHelper4,
+      spotLightHelper5,
+      pointLightHelper,
+      spotLightHelper6,
+      stage.scene
     );
     scene.remove(particles);
     sphereGroup.visible = false;
@@ -944,6 +1003,5 @@ clearBtn.addEventListener("click", () => {
   console.log("clear");
   clearScene();
 });
-console.log("test");
-console.log("anotherTest");
+
 console.log("push to both remote origins test");
