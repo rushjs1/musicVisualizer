@@ -88,6 +88,14 @@ gltfLoader.load("/models/concert_stage/scene.gltf", gltf => {
 
   scene.add(stage.scene);
 });
+let piano;
+gltfLoader.load("/models/grand_piano/scene.gltf", gltf => {
+  piano = gltf;
+  piano.scene.scale.set(0.5, 0.5, 0.5);
+  piano.scene.position.set(0, 0.3, -5);
+  piano.scene.rotation.y = Math.PI * 0.25;
+  scene.add(piano.scene);
+});
 
 let plane4, plane5;
 
@@ -333,7 +341,7 @@ scifi1NormalTexture.wrapT = THREE.RepeatWrapping;
 scifi1MetalTexture.wrapT = THREE.RepeatWrapping;
 
 const plane2 = new THREE.Mesh(plane2geo, concreteMaterial);
-plane2.position.set(0, 5, -10);
+plane2.position.set(0, 5, -12);
 plane4 = new THREE.Mesh(plane2geo, concreteMaterial);
 plane4.position.set(10, 5, 0);
 plane4.rotation.y = -Math.PI * 0.5;
@@ -364,7 +372,7 @@ spotLight4.intensity = 2;
 spotLight.position.set(2.7, 2.6, 4.2);
 spotLight6.position.set(-2.7, 2.6, 4.2);
 
-//marble floor
+//TILE floor
 const tileFloor = new THREE.Mesh(
   new THREE.PlaneGeometry(20, 30),
   new THREE.MeshStandardMaterial({
@@ -395,6 +403,18 @@ tileOccTexture.wrapT = THREE.RepeatWrapping;
 tileRoughTexture.wrapT = THREE.RepeatWrapping;
 tileHeightTexture.wrapT = THREE.RepeatWrapping;
 tileNormalTexture.wrapT = THREE.RepeatWrapping;
+
+///lazers
+var lazerY = 8;
+const lineMaterial = new THREE.LineBasicMaterial({
+  color: 0x0000ff
+});
+const points = [];
+points.push(new THREE.Vector3(-7, lazerY, -6));
+points.push(new THREE.Vector3(0, lazerY, 0));
+points.push(new THREE.Vector3(7, lazerY, 6));
+const lazerGeo = new THREE.BufferGeometry().setFromPoints(points);
+const lazer = new THREE.Line(lazerGeo, lineMaterial);
 
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(2, 32, 32),
@@ -432,7 +452,7 @@ selectSongDV.addEventListener("change", () => {
 
 ///group of spheres for viz
 const sphereGroup = new THREE.Object3D();
-sphereColorObject.color1 = "#340c7d";
+sphereColorObject.sphereColor = "#340c7d";
 let sMaterial;
 const spheres = [];
 let sWidth = 64;
@@ -445,7 +465,7 @@ function createSphere(geo, mat) {
 function positionSpheres() {
   const sGeometry = new THREE.SphereGeometry(0.3, 32, 32);
   sMaterial = new THREE.MeshBasicMaterial({
-    color: sphereColorObject.color1,
+    color: sphereColorObject.sphereColor,
     specular: 0xffffff,
     shininess: 100,
     emissive: 0x0,
@@ -482,6 +502,7 @@ scene.add(
   tileFloor,
   ball,
   sphereGroup
+  // lazer
 );
 
 ///gui
@@ -543,8 +564,8 @@ gui
     );
   });
 gui
-  .addColor(sphereColorObject, "color1")
-  .name("color1")
+  .addColor(sphereColorObject, "sphereColor")
+  .name("Sphere Group Color")
   .onChange(() => {
     sMaterial.color.set(sphereColorObject.color1);
   });
@@ -601,7 +622,7 @@ camera.position.x = 1;
 camera.position.y = 1;
 camera.position.z = 8;
 cameraObject = {
-  switch: true
+  switch: false
 };
 
 scene.add(camera);
@@ -686,7 +707,7 @@ let renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 const bloomPass = new UnrealBloomPass();
 bloomPass.strength = 0.8;
-composer.addPass(bloomPass);
+//composer.addPass(bloomPass);
 renderer.toneMappingExposure = 0.4;
 const glitchPass = new GlitchPass();
 //composer.addPass(glitchPass);
@@ -757,7 +778,7 @@ const tick = () => {
 
     //postprocessing
     //bloomPass.strength = 0.4;
-    bloomPass.strength = abletonMusicData;
+    //bloomPass.strength = abletonMusicData;
     glitchPass.goWild = true;
     const randomColorHex = Math.floor(Math.random() * 16777215).toString(16);
     const randomColorHex2 = Math.floor(Math.random() * 16777215).toString(16);
@@ -776,11 +797,18 @@ const tick = () => {
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
   } else {
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
-
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
-    bloomPass.strength = abletonMusicData / 3;
+    // bloomPass.strength = abletonMusicData / 3;
     glitchPass.goWild = false;
     //bloomPass.strength = 0.2;
+  }
+
+  if (abletonMusicData) {
+    spotLight.intensity = abletonMusicData * 15;
+    spotLight6.intensity = abletonMusicData * 15;
+  } else if (soundData) {
+    spotLight.intensity = soundData * 0.05;
+    spotLight6.intensity = soundData * 0.05;
   }
 
   //shaders
@@ -816,20 +844,17 @@ const tick = () => {
   perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
   ///camera
-  /*   const cameraAngle = elapsedTime * 0.5;
+  const cameraAngle = elapsedTime * 0.5;
   if (cameraObject.switch) {
     camera.position.x = Math.cos(cameraAngle) * 22;
     camera.position.z = Math.sin(cameraAngle) * 22;
   } else {
     camera.position.x = camera.position.x;
     camera.position.z = camera.position.z;
-  } */
+  }
 
   //updateTorus(soundData, 60, 30);
   //updateShader(abletonMusicData, 160, 130);
-
-  spotLight.intensity = soundData * 0.05;
-  spotLight6.intensity = soundData * 0.05;
 
   //render
   //renderer.render(scene, camera);
@@ -876,7 +901,9 @@ function clearScene() {
       stage.scene,
       stageScreen1,
       stageScreen2,
-      stageScreen3
+      stageScreen3,
+      piano.scene
+      //   lazer
     );
     if (!sphereGroup.visible) {
       scene.add(particles);
@@ -927,7 +954,9 @@ function clearScene() {
       stage.scene,
       stageScreen1,
       stageScreen2,
-      stageScreen3
+      stageScreen3,
+      piano.scene
+      // lazer
     );
     scene.remove(particles);
     sphereGroup.visible = false;

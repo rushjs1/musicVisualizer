@@ -1,0 +1,11 @@
+Model Information:
+* title:	grand Piano
+* source:	https://sketchfab.com/3d-models/grand-piano-820675636b69403daaf19719e02ad31d
+* author:	Ahmed (https://sketchfab.com/fakeahmed09)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "grand Piano" (https://sketchfab.com/3d-models/grand-piano-820675636b69403daaf19719e02ad31d) by Ahmed (https://sketchfab.com/fakeahmed09) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
