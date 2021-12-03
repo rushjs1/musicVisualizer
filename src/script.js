@@ -726,7 +726,7 @@ gui
   .step(0.001)
   .name("bloomStrength"); */
 
-gui.add(cameraObject, "switch").name("Rotate Camera");
+gui.add(cameraObject, "switch").name("Orbit Camera");
 
 gui
   .add(averageFrequencyForColorChange, "value")
