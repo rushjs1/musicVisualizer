@@ -14,20 +14,15 @@ let root_note = null;
 
 app.use(express.static(__dirname + "/dist"));
 
-/* app.get("/src/", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "index.html"));
-}); */
 app.get("/src/", (req, res) => {
   res.sendFile(path.resolve(__dirname, "index.html"));
 });
 
 io.on("connection", socket => {
   console.log("a user connected");
-  const test = async () => {
+  const runAbleton = async () => {
     ableton.on("error", () => {});
     ableton.song.addListener("is_playing", p => console.log("Playing:", p));
-
-    // ableton.song.addListener("tempo", t => console.log("Tempo:", t));
 
     master = await ableton.song.get("master_track");
     master.addListener("output_meter_left", d => {
@@ -38,8 +33,7 @@ io.on("connection", socket => {
     console.log(root_note);
   };
 
-  test();
-
+  runAbleton();
   socket.on("disconnect", () => {
     console.log("A user disconnected");
   });

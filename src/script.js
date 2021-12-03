@@ -5,8 +5,6 @@ import * as dat from "dat.gui";
 import { gsap } from "gsap";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Vector3 } from "three";
-
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
@@ -22,7 +20,7 @@ import perlinColorFragmentShader from "./shaders/perlinColor/fragment.glsl";
 import { io } from "socket.io-client";
 
 //exp test
-const experience = new Experience(document.querySelector("canvas.webGL"));
+//const experience = new Experience(document.querySelector("canvas.webGL"));
 
 //
 const gui = new dat.GUI({ width: 340 });
@@ -32,8 +30,6 @@ const perlinDebugObject = {};
 const sphereColorObject = {};
 let cameraObject = {};
 
-//import SimplexNoise from "simplex-noise";
-
 //canvas and scene and sizes
 const canvas = document.querySelector("canvas.webGL");
 const scene = new THREE.Scene();
@@ -41,8 +37,7 @@ const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
 };
-//scene.background = new THREE.Color(0x6e6e6e);
-//scene.background = new THREE.Color(0x00ffa4);
+
 ////textures////
 const textureLoader = new THREE.TextureLoader();
 const soicTexture = textureLoader.load("/shaderTextures/soicMask1.jpeg");
@@ -59,21 +54,7 @@ const tileHeightTexture = textureLoader.load("/textures/tiles/height.png");
 const tileNormalTexture = textureLoader.load("/textures/tiles/normal.jpg");
 const tileRoughTexture = textureLoader.load("/textures/tiles/rough.jpg");
 const tileOccTexture = textureLoader.load("/textures/tiles/occ.jpg");
-//concrete
-//const concreteColorTexture = textureLoader.load("/textures/concrete/color.jpg");
-//const concreteHeightTexture = textureLoader.load(
-//  "/textures/concrete/height.png"
-//);
-//const concreteNormalTexture = textureLoader.load(
-//  "/textures/concrete/normal.jpg"
-//);
-//const concreteRoughTexture = textureLoader.load(
-//  "/textures/concrete/roughness.jpg"
-//);
-//const concreteOccTexture = textureLoader.load("/textures/concrete/AO.jpg");
-//const concreteMetallicTexture = textureLoader.load(
-//  "/textures/concrete/metallic.jpg"
-//);
+
 ////SCI-FI1
 const scifi1ColorTexture = textureLoader.load(
   "/textures/sci-fi1/basecolor.jpg"
@@ -126,13 +107,10 @@ spotLight.target.position.z = 4;
 const spotLight2 = new THREE.SpotLight(0xffffff, 2, 30, Math.PI * 0.15, 0.25);
 spotLight2.target.position.z = -4;
 
-//spotLight2.position.set(spotLightx, 6, 5);
 const spotLight3 = new THREE.SpotLight(0xf2e0b9, 2, 30, Math.PI * 0.15);
 spotLight3.target.position.z = -4;
 spotLight3.target.position.x = 6;
 
-//spotLight3.position.set(4, 2, 4);
-//scene.add(spotLight, pointLight, spotLight2);
 const spotLight4 = new THREE.SpotLight(0x687bcd, 2, 10, Math.PI * 0.15);
 const spotLight5 = new THREE.SpotLight(0x689fe3, 2, 30, Math.PI * 0.15);
 spotLight5.target.position.z = -10;
@@ -159,6 +137,7 @@ const spotLightHelper3 = new THREE.SpotLightHelper(spotLight3);
 const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
 const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
 const spotLightHelper6 = new THREE.SpotLightHelper(spotLight6);
+
 scene.add(
   pointLightHelper,
   spotLightHelper,
@@ -177,6 +156,37 @@ window.requestAnimationFrame(() => {
   spotLightHelper6.update();
 });
 
+let debugSpotLightObject = {
+  switch: true
+};
+console.log(debugSpotLightObject.switch);
+gui
+  .add(debugSpotLightObject, "switch")
+  .name("Light Helpers Active")
+  .onChange(() => {
+    console.log(debugSpotLightObject.switch);
+    if (!debugSpotLightObject.switch) {
+      scene.remove(
+        pointLightHelper,
+        spotLightHelper,
+        spotLightHelper2,
+        spotLightHelper3,
+        spotLightHelper4,
+        spotLightHelper5,
+        spotLightHelper6
+      );
+    } else {
+      scene.add(
+        pointLightHelper,
+        spotLightHelper,
+        spotLightHelper2,
+        spotLightHelper3,
+        spotLightHelper4,
+        spotLightHelper5,
+        spotLightHelper6
+      );
+    }
+  });
 //particles
 const particlesGeo = new THREE.BufferGeometry();
 const count = 1750;
@@ -251,19 +261,24 @@ debugObject.depthColor = "#00ffa4";
 debugObject.surfaceColor = "#8888ff";
 var soundData = 0.0;
 
+var debugColorOffset = {
+  value: 0.25
+};
+var debugElevation = {
+  value: 0.2
+};
 const floorMaterial = new THREE.ShaderMaterial({
   vertexShader: floorVertexShader,
   fragmentShader: floorFragmentShader,
-
   uniforms: {
     uTime: { value: 0 },
-    uBigWavesElevation: { value: 0.2 },
+    uBigWavesElevation: { value: debugElevation.value },
     uBigWavesFrequency: { value: new THREE.Vector2(4, 1.5) },
     uBigWavesSpeed: { value: 0.75 },
     //color
     uDepthColor: { value: new THREE.Color(debugObject.depthColor) },
     uSurfaceColor: { value: new THREE.Color(debugObject.surfaceColor) },
-    uColorOffset: { value: 0.25 },
+    uColorOffset: { value: debugColorOffset.value },
     uColorMulti: { value: 2 },
     uSoundData: { value: soundData }
   }
@@ -271,6 +286,8 @@ const floorMaterial = new THREE.ShaderMaterial({
 
 const plane2geo = new THREE.PlaneGeometry(20, 11.1, 128, 128);
 const plane3geo = new THREE.PlaneGeometry(20, 30, 128, 128);
+const planeStageGeo = new THREE.PlaneGeometry(6, 4.6, 128, 128);
+const planeStageGeo2 = new THREE.PlaneGeometry(4, 2.3, 128, 128);
 
 /* spiked floor */
 const floor = new THREE.Mesh(
@@ -284,7 +301,7 @@ const floor = new THREE.Mesh(
 floor.rotation.x = -Math.PI * 0.5;
 floor.position.y = -0.65;
 
-//walls
+//WALLS
 const concreteMaterial = new THREE.MeshStandardMaterial({
   map: scifi1ColorTexture,
   aoMap: scifi1OccTexture,
@@ -324,10 +341,20 @@ plane5 = new THREE.Mesh(plane2geo, concreteMaterial);
 plane5.position.set(-10, 5, 0);
 plane5.rotation.y = Math.PI * 0.5;
 
-//const celing
+// CEILING
 const plane3 = new THREE.Mesh(plane3geo, perlinColorShaderMaterial);
 plane3.position.set(0, 10, 0);
 plane3.rotation.x = Math.PI * 0.5;
+
+//STAGE SCREENS
+const stageScreen1 = new THREE.Mesh(planeStageGeo, perlinColorShaderMaterial);
+stageScreen1.position.set(0, 3.8, -8.1);
+const stageScreen2 = new THREE.Mesh(planeStageGeo2, floorMaterial);
+stageScreen2.position.set(-5.3, 3.7, -5);
+stageScreen2.rotation.y = Math.PI * 0.1;
+const stageScreen3 = new THREE.Mesh(planeStageGeo2, floorMaterial);
+stageScreen3.position.set(5.5, 3.7, -5.1);
+stageScreen3.rotation.y = -Math.PI * 0.145;
 
 plane2.add(spotLight, spotLight6);
 plane3.add(spotLight3, spotLight5);
@@ -374,22 +401,6 @@ const sphere = new THREE.Mesh(
   perlinColorShaderMaterial
 );
 sphere.position.x = 1.5;
-const sphere2 = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 32, 32),
-  perlinColorShaderMaterial
-);
-
-const cube1 = new THREE.Mesh(
-  new THREE.BoxGeometry(0.75, 0.75, 0.75),
-  perlinColorShaderMaterial
-);
-
-const torus = new THREE.Mesh(
-  new THREE.TorusGeometry(0.3, 0.2, 32, 64),
-  perlinColorShaderMaterial
-);
-
-torus.position.x = 1.5;
 
 const flagPole = new THREE.Mesh(
   new THREE.CylinderGeometry(0.1, 0.1, 9.5, 32),
@@ -433,14 +444,6 @@ function createSphere(geo, mat) {
 
 function positionSpheres() {
   const sGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-  /*  sMaterial = new THREE.MeshPhongMaterial({
-    color: sphereColorObject.color1,
-    specular: 0xffffff,
-    shininess: 100,
-    emissive: 0x0,
-    flatShading: THREE.SmoothShading,
-    side: THREE.DoubleSide
-  }); */
   sMaterial = new THREE.MeshBasicMaterial({
     color: sphereColorObject.color1,
     specular: 0xffffff,
@@ -463,64 +466,19 @@ function positionSpheres() {
 
   sphereGroup.position.set(-26, -6, 0);
 }
-//positionSpheres();
-
-//infinity practice
-
-var iMesh = null;
-var iGroup = new THREE.Object3D();
-var sectionWidth = 8;
-var loopSectionPosition = 0;
-var iBoxGeo = new THREE.BoxGeometry(0.75, 0.75, 0.75);
-
-const iMat = new THREE.MeshNormalMaterial({});
-const iMat2 = new THREE.MeshBasicMaterial({
-  color: 0x00ff00
-});
-const iAmount = parseInt(window.location.search.substr(1)) || 10;
-const iCount = Math.pow(iAmount, 3);
-
-function addInstancedMesh() {
-  iMesh = new THREE.InstancedMesh(iBoxGeo, iMat, 4);
-  iMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-
-  scene.add(iMesh);
-  iPositions(iMesh, 0);
-}
-
-function iPositions(mesh, section) {
-  for (var i = 0; i < mesh.count; i++) {
-    var zStaticPosition = -sectionWidth * (i + 1);
-    var zSectionPosition = sectionWidth * section;
-    var z = zStaticPosition + zSectionPosition;
-
-    iGroup.position.set(0, 0, z);
-    iGroup.updateMatrix();
-    mesh.setMatrixAt(i, iGroup.matrix);
-  }
-  mesh.instanceMatrix.needsUpdate = true;
-}
-
-function runInfinity() {
-  var distance = Math.round(camera.position.z / sectionWidth);
-  if (distance !== loopSectionPosition) {
-    loopSectionPosition = distance;
-    iPositions(iMesh, loopSectionPosition);
-  }
-}
-
-//scene.add(sphere, cube1, torus, plane, floor, plane2, ball, sphereGroup);
-//spotLight3.target = plane3;
 
 scene.add(
   sphere,
   plane,
   flagPole,
-  floor,
+  // floor,
   plane2,
   plane3,
   plane4,
   plane5,
+  stageScreen1,
+  stageScreen2,
+  stageScreen3,
   tileFloor,
   ball,
   sphereGroup
@@ -590,6 +548,20 @@ gui
   .onChange(() => {
     sMaterial.color.set(sphereColorObject.color1);
   });
+
+gui
+  .add(debugElevation, "value")
+  .min(0)
+  .max(0.2)
+  .step(0.1)
+  .name("Floor Elevation");
+gui
+  .add(debugColorOffset, "value")
+  .min(0)
+  .max(0.35)
+  .step(0.05)
+  .name("Color Offset");
+
 /* gui
   .add(floorMaterial.uniforms.uColorOffset, "value")
   .min(0)
@@ -602,17 +574,6 @@ gui
   .max(10)
   .step(0.001)
   .name("uColorMulti"); */
-
-/* const positionAttribute = torus.geometry.getAttribute("position");
-const vertex = new THREE.Vector3();
-for (
-  let vertexIndex = 0;
-  vertexIndex < positionAttribute.count;
-  vertexIndex++
-) {
-  vertex.fromBufferAttribute(positionAttribute, vertexIndex);
-  console.log(vertex);
-} */
 
 ///resize
 window.addEventListener("resize", () => {
@@ -656,12 +617,6 @@ let renderer = new THREE.WebGL1Renderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-/* function render() {
-  camera.position.z -= 0.4;
-  runInfinity();
-  composer.render();
-} */
-
 //////threejs audio loader//////
 
 let soundDataArray, bufferLength, analyser, sound;
@@ -681,7 +636,6 @@ function loadThreeAudio(song) {
     sound.setBuffer(buffer);
     sound.setLoop(true);
     sound.setVolume(0.5);
-    //console.log(buffer);
   });
   console.log(sound);
   //THREE ANALYSER
@@ -714,17 +668,12 @@ function moveCamera() {
   gsap.to(camera.position, { x: camera.position.x + 2 });
 }
 
-let abletonMusicData = null;
 //socket io && ableton
+let abletonMusicData = null;
 var socket = io();
 socket.on("musicEmit", function(msg) {
-  // console.log(msg);
   abletonMusicData = msg;
 });
-
-///hex to rgb
-console.log(perlinColorShaderMaterial.uniforms.uSurfaceColor.value.set());
-console.log(Math.floor(Math.random() * 16777215).toString(16));
 
 let randomThreeColor = new THREE.Color(0xffffff);
 let randomThreeColor2 = new THREE.Color(0xffffff);
@@ -797,22 +746,13 @@ const tick = () => {
     spotLight.color.set(randomThreeColor4);
     //moveCamera();
   }
-  //console.log(soundData);
 
   //update controls
   controls.update();
 
-  //update objects
-
-  cube1.rotation.y = 0.4 * elapsedTime;
-  cube1.rotation.x = 0.4 * elapsedTime;
-  //torus.rotation.y = 0.2 * soundData;
-
   if (abletonMusicData > 0.9) {
-    /*   floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.005;
-    perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
-      soundData * 0.006; */
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData * 0.5;
+
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
 
     //postprocessing
@@ -834,36 +774,29 @@ const tick = () => {
       randomThreeColor
     );
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
-    // spotLightx = abletonMusicData * -2;
   } else {
-    /*  floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
-    perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
-      soundData * 0.003; */
-
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
+
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     bloomPass.strength = abletonMusicData / 3;
     glitchPass.goWild = false;
     //bloomPass.strength = 0.2;
-    //spotLight.intensity = 30 * abletonMusicData;
-    //pointLight.intensity = 3 * abletonMusicData;
-    //  spotLightx = abletonMusicData * 2;
   }
 
   //shaders
   shaderOneMaterial.uniforms.uTime.value = elapsedTime;
 
-  floorMaterial.uniforms.uTime.value = elapsedTime;
   //floorMaterial.uniforms.uTime.value = soundData * 0.02;
   //shaders
   //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
 
   /* try with ableton */
   //bloomPass.strength = abletonMusicData / 3;
+
+  floorMaterial.uniforms.uTime.value = elapsedTime;
   floorMaterial.uniforms.uColorMulti.value = abletonMusicData;
   floorMaterial.uniforms.uColorOffset.value = abletonMusicData;
   floorMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData;
-  //spotLight4.intensity = abletonMusicData * 2;
 
   perlinColorShaderMaterial.uniforms.uColorMulti.value = abletonMusicData;
   perlinColorShaderMaterial.uniforms.uColorOffset.value = abletonMusicData;
@@ -926,7 +859,7 @@ function clearScene() {
       sphere,
       plane,
       flagPole,
-      floor,
+      // floor,
       plane2,
       plane3,
       plane4,
@@ -940,7 +873,10 @@ function clearScene() {
       spotLightHelper4,
       spotLightHelper5,
       spotLightHelper6,
-      stage.scene
+      stage.scene,
+      stageScreen1,
+      stageScreen2,
+      stageScreen3
     );
     if (!sphereGroup.visible) {
       scene.add(particles);
@@ -973,7 +909,7 @@ function clearScene() {
       sphere,
 
       plane,
-      floor,
+      //  floor,
       plane2,
       plane3,
       plane4,
@@ -988,7 +924,10 @@ function clearScene() {
       spotLightHelper5,
       pointLightHelper,
       spotLightHelper6,
-      stage.scene
+      stage.scene,
+      stageScreen1,
+      stageScreen2,
+      stageScreen3
     );
     scene.remove(particles);
     sphereGroup.visible = false;
