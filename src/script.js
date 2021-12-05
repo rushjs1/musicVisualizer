@@ -415,12 +415,15 @@ for (var i = 0; i < 11; i++) {
   lazer[i] = new THREE.Mesh(lazerGeo, lazerMaterial);
   lazer[i].position.set(-i + 5, 8, -5.7);
   lazer[i].rotation.x = -Math.PI * 0.35;
-
-  /*   if (i < 5) {
-    lazer[i].rotation.z = (Math.PI * 0.35) / -i;
-  } else {
-    lazer[i].rotation.z = (Math.PI * -0.5) / -i;
-  } */
+  //lazer[i].rotation.z = (Math.PI * -0.5) / -i;
+  //lazer[i].rotation.z = 0.26179938779 * -i;
+  // if (i < 4) {
+  //  lazer[i].rotation.z = (Math.PI * 0.35) / -i;
+  //} else {
+  //  //lazer[i].rotation.z = (Math.PI * -0.5) / -i;
+  //  lazer[i].rotation.z = -0.26179938779;
+  //}
+  //lazer[i].rotation.z = -0.22439947525;
   scene.add(lazer[i]);
 }
 
@@ -699,6 +702,38 @@ function moveSphereWave() {
   }
 }
 
+var maxLazerRotation = -0.1;
+function moveLazers(averageFreq) {
+  if (sound && sound.isPlaying) {
+    analyser.getFrequencyData(soundDataArray);
+    if (averageFreq > averageFrequencyForColorChange.value) {
+      for (var i = 0; i < bufferLength; i++) {
+        const p = soundDataArray[i];
+        for (var j = 0; j < 11; j++) {
+          lazer[j].rotation.z += p / 460;
+          if (lazer[j].rotation.z || lazer[j].rotation.x >= maxLazerRotation) {
+            // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
+            lazer[j].rotation.x = -1.4;
+          }
+        }
+      }
+    } else {
+      for (var j = 0; j < 11; j++) {
+        lazer[j].rotation.z = 0;
+        lazer[j].rotation.x += 0.007;
+        if (lazer[j].rotation.x >= maxLazerRotation) {
+          // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
+          lazer[j].rotation.x = -1.4;
+        }
+      }
+    }
+  } else {
+    for (var i = 0; i < 11; i++) {
+      lazer[i].rotation.x = 0;
+    }
+  }
+}
+
 function moveCamera() {
   gsap.to(camera.position, { x: camera.position.x + 2 });
 }
@@ -764,9 +799,10 @@ const tick = () => {
 
   ///Audio ///
 
-  moveSphereWave();
-
   soundData = analyser.getAverageFrequency();
+  moveSphereWave();
+  moveLazers(soundData);
+
   logAf(soundData);
   if (soundData > averageFrequencyForColorChange.value) {
     const randomColorHex3 = Math.floor(Math.random() * 16777215).toString(16);
@@ -780,7 +816,7 @@ const tick = () => {
     spotLight.color.set(randomThreeColor4);
     //moveCamera();
   }
-  if (soundData) {
+  /*   if (soundData) {
     //move lazers
     // hemisphericLight.intensity = soundData / 500;
     const lazerAngle = elapsedTime * 0.5;
@@ -792,7 +828,7 @@ const tick = () => {
         lazer[i].rotation.x = -1.4;
       }
     }
-  }
+  } */
 
   //update controls
   controls.update();
