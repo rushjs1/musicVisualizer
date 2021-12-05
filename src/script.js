@@ -29,6 +29,7 @@ const debugObject = {};
 const perlinDebugObject = {};
 const sphereColorObject = {};
 let cameraObject = {};
+let hemisphericLightObject = {};
 
 //canvas and scene and sizes
 const canvas = document.querySelector("canvas.webGL");
@@ -42,12 +43,7 @@ const sizes = {
 const textureLoader = new THREE.TextureLoader();
 const soicTexture = textureLoader.load("/shaderTextures/soicMask1.jpeg");
 const particleTexture = textureLoader.load("/particles/1.png");
-///marble
-//const marbleColorTexture = textureLoader.load("/textures/marble/color.jpg");
-//const marbleDispTexture = textureLoader.load("textures/marble/disp.jpg");
-//const marbleNormalTexture = textureLoader.load("/textures/marble/normal.jpg");
-//const marbleSpecTexture = textureLoader.load("/textures/marble/spec.jpg");
-//const marbleOccTexture = textureLoader.load("/textures/marble/occ.jpg");
+
 //tiles
 const tileColorTexture = textureLoader.load("/textures/tiles/color.jpg");
 const tileHeightTexture = textureLoader.load("/textures/tiles/height.png");
@@ -66,17 +62,6 @@ const scifi1RoughTexture = textureLoader.load(
 );
 const scifi1OccTexture = textureLoader.load("/textures/sci-fi1/AO.jpg");
 const scifi1MetalTexture = textureLoader.load("/textures/sci-fi1/metallic.jpg");
-
-//stage textures
-const concertTextureColor = textureLoader.load(
-  "/models/concert_stage/color.tga"
-);
-const concertTextureNormal = textureLoader.load(
-  "/models/concert_stage/normal.tga"
-);
-const concertTextureMetal = textureLoader.load(
-  "/models/concert_stage/metal.tga"
-);
 
 //model loader
 const gltfLoader = new GLTFLoader();
@@ -101,8 +86,12 @@ let plane4, plane5;
 
 ////lights
 
+hemisphericLightObject = {
+  value: 0.2
+};
 const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.2);
 scene.add(hemisphericLight);
+
 /* const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
 rectAreaLight.position.set(-1.5, 0, 1.5);
 scene.add(rectAreaLight); */
@@ -525,6 +514,13 @@ scene.add(
 
 ///gui
 
+gui
+  .add(hemisphericLight, "intensity")
+  .min(0)
+  .max(1)
+  .step(0.001)
+  .name("Hemispheric Light Intensity");
+
 /* gui
   .add(floorMaterial.uniforms.uBigWavesElevation, "value")
   .min(0)
@@ -786,6 +782,7 @@ const tick = () => {
   }
   if (soundData) {
     //move lazers
+    // hemisphericLight.intensity = soundData / 500;
     const lazerAngle = elapsedTime * 0.5;
     var maxLazerRotation = -0.1;
     for (i = 0; i < 11; i++) {
