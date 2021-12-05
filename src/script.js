@@ -100,9 +100,9 @@ gltfLoader.load("/models/grand_piano/scene.gltf", gltf => {
 let plane4, plane5;
 
 ////lights
-let spotLightx = 4;
-/* const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
-scene.add(hemisphericLight); */
+
+const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.2);
+scene.add(hemisphericLight);
 /* const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
 rectAreaLight.position.set(-1.5, 0, 1.5);
 scene.add(rectAreaLight); */
@@ -146,7 +146,7 @@ const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
 const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
 const spotLightHelper6 = new THREE.SpotLightHelper(spotLight6);
 
-scene.add(
+/* scene.add(
   pointLightHelper,
   spotLightHelper,
   spotLightHelper2,
@@ -154,7 +154,7 @@ scene.add(
   spotLightHelper4,
   spotLightHelper5,
   spotLightHelper6
-);
+); */
 window.requestAnimationFrame(() => {
   spotLightHelper.update();
   spotLightHelper2.update();
@@ -165,7 +165,7 @@ window.requestAnimationFrame(() => {
 });
 
 let debugSpotLightObject = {
-  switch: true
+  switch: false
 };
 console.log(debugSpotLightObject.switch);
 gui
@@ -404,17 +404,36 @@ tileRoughTexture.wrapT = THREE.RepeatWrapping;
 tileHeightTexture.wrapT = THREE.RepeatWrapping;
 tileNormalTexture.wrapT = THREE.RepeatWrapping;
 
-///lazers
-var lazerY = 8;
-const lineMaterial = new THREE.LineBasicMaterial({
-  color: 0x0000ff
+//lazers
+
+const lazerMaterial = new THREE.MeshStandardMaterial({
+  color: 0x4444aa,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true
 });
-const points = [];
-points.push(new THREE.Vector3(-7, lazerY, -6));
-points.push(new THREE.Vector3(0, lazerY, 0));
-points.push(new THREE.Vector3(7, lazerY, 6));
-const lazerGeo = new THREE.BufferGeometry().setFromPoints(points);
-const lazer = new THREE.Line(lazerGeo, lineMaterial);
+
+let lazerHeight = 20;
+
+const lazerGeo = new THREE.CylinderGeometry(0.05, 0.05, lazerHeight, 32);
+lazerGeo.applyMatrix(
+  new THREE.Matrix4().makeTranslation(0, -lazerHeight / 2, 0)
+);
+
+let lazer = [];
+
+for (var i = 0; i < 11; i++) {
+  lazer[i] = new THREE.Mesh(lazerGeo, lazerMaterial);
+  lazer[i].position.set(-i + 5, 8, -5.7);
+  lazer[i].rotation.x = -Math.PI * 0.35;
+
+  /*   if (i < 5) {
+    lazer[i].rotation.z = (Math.PI * 0.35) / -i;
+  } else {
+    lazer[i].rotation.z = (Math.PI * -0.5) / -i;
+  } */
+  scene.add(lazer[i]);
+}
 
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(2, 32, 32),
@@ -502,7 +521,6 @@ scene.add(
   tileFloor,
   ball,
   sphereGroup
-  // lazer
 );
 
 ///gui
@@ -761,11 +779,22 @@ const tick = () => {
     let newColor4 = `#${randomColorHex4}`;
     randomThreeColor3.set(newColor3);
     randomThreeColor4.set(newColor4);
-    console.log(randomThreeColor3);
     sMaterial.color.set(randomThreeColor3);
     spotLight6.color.set(randomThreeColor3);
     spotLight.color.set(randomThreeColor4);
     //moveCamera();
+  }
+  if (soundData) {
+    //move lazers
+    const lazerAngle = elapsedTime * 0.5;
+    var maxLazerRotation = -0.1;
+    for (i = 0; i < 11; i++) {
+      lazer[i].rotation.x += 0.007;
+      if (lazer[i].rotation.x >= maxLazerRotation) {
+        // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
+        lazer[i].rotation.x = -1.4;
+      }
+    }
   }
 
   //update controls
@@ -891,20 +920,15 @@ function clearScene() {
       plane5,
       ball,
       tileFloor,
-      spotLightHelper,
-      spotLightHelper2,
-      pointLightHelper,
-      spotLightHelper3,
-      spotLightHelper4,
-      spotLightHelper5,
-      spotLightHelper6,
       stage.scene,
       stageScreen1,
       stageScreen2,
       stageScreen3,
       piano.scene
-      //   lazer
     );
+    for (var i = 0; i < 11; i++) {
+      lazer[i].visible = false;
+    }
     if (!sphereGroup.visible) {
       scene.add(particles);
       sphereGroup.visible = true;
@@ -944,20 +968,15 @@ function clearScene() {
       ball,
       tileFloor,
       flagPole,
-      spotLightHelper,
-      spotLightHelper2,
-      spotLightHelper3,
-      spotLightHelper4,
-      spotLightHelper5,
-      pointLightHelper,
-      spotLightHelper6,
       stage.scene,
       stageScreen1,
       stageScreen2,
       stageScreen3,
       piano.scene
-      // lazer
     );
+    for (var i = 0; i < 11; i++) {
+      lazer[i].visible = true;
+    }
     scene.remove(particles);
     sphereGroup.visible = false;
     selectSongDV.style.display = "none";
