@@ -401,7 +401,31 @@ const lazerMaterial = new THREE.MeshStandardMaterial({
   depthWrite: false,
   transparent: true
 });
+const lazerMaterial2 = new THREE.MeshStandardMaterial({
+  color: 0x4ce429,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true
+});
 
+const lazerMaterial3 = new THREE.MeshStandardMaterial({
+  color: 0xff483f,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true
+});
+const lazerMaterial4 = new THREE.MeshStandardMaterial({
+  color: 0xff33dc,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true
+});
+const lazerMaterial5 = new THREE.MeshStandardMaterial({
+  color: 0xe35e12,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true
+});
 let lazerHeight = 20;
 
 const lazerGeo = new THREE.CylinderGeometry(0.05, 0.05, lazerHeight, 32);
@@ -425,6 +449,45 @@ for (var i = 0; i < 11; i++) {
   //}
   //lazer[i].rotation.z = -0.22439947525;
   scene.add(lazer[i]);
+}
+
+let lowLazer1 = [];
+for (var i = 0; i < 11; i++) {
+  lowLazer1[i] = new THREE.Mesh(lazerGeo, lazerMaterial2);
+  lowLazer1[i].position.set(0, 0.5, -5.7);
+  lowLazer1[i].rotation.x = -Math.PI * 0.5;
+  lowLazer1[i].rotation.z = -i / 12 + 0.4;
+
+  scene.add(lowLazer1[i]);
+}
+
+let lowLazer2 = [];
+for (var i = 0; i < 11; i++) {
+  lowLazer2[i] = new THREE.Mesh(lazerGeo, lazerMaterial5);
+  lowLazer2[i].position.set(0, 0.5, -5.7);
+  lowLazer2[i].rotation.x = -Math.PI * 0.5;
+  lowLazer2[i].rotation.z = -i / 12 + 0.4;
+
+  scene.add(lowLazer2[i]);
+}
+
+let topLeftLazer = [];
+
+for (var i = 0; i < 11; i++) {
+  topLeftLazer[i] = new THREE.Mesh(lazerGeo, lazerMaterial3);
+  topLeftLazer[i].position.set(-8, 8, -5.7);
+  topLeftLazer[i].rotation.x = -Math.PI * 0.3;
+  topLeftLazer[i].rotation.z = i / 12;
+  scene.add(topLeftLazer[i]);
+}
+let topRightLazer = [];
+
+for (var i = 0; i < 11; i++) {
+  topRightLazer[i] = new THREE.Mesh(lazerGeo, lazerMaterial4);
+  topRightLazer[i].position.set(8, 8, -5.7);
+  topRightLazer[i].rotation.x = -Math.PI * 0.3;
+  topRightLazer[i].rotation.z = -i / 12;
+  scene.add(topRightLazer[i]);
 }
 
 const sphere = new THREE.Mesh(
@@ -702,34 +765,79 @@ function moveSphereWave() {
   }
 }
 
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 var maxLazerRotation = -0.1;
+
+function getRandomFloat(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+/* gui
+  .add(lazer[0].rotation, "x")
+  .min(-2)
+  .max(2)
+  .step(0.001)
+  .name("x"); */
+
 function moveLazers(averageFreq) {
   if (sound && sound.isPlaying) {
     analyser.getFrequencyData(soundDataArray);
     if (averageFreq > averageFrequencyForColorChange.value) {
-      for (var i = 0; i < bufferLength; i++) {
-        const p = soundDataArray[i];
-        for (var j = 0; j < 11; j++) {
-          lazer[j].rotation.z += p / 460;
-          if (lazer[j].rotation.z || lazer[j].rotation.x >= maxLazerRotation) {
-            // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
-            lazer[j].rotation.x = -1.4;
-          }
-        }
+      for (var j = 0; j < 11; j++) {
+        // let p = clamp(averageFreq, -2, -0.94);
+        let p = getRandomFloat(-2, -0.25);
+        console.log(0 + p);
+        topLeftLazer[j].rotation.x = 0 + p;
+        topRightLazer[j].rotation.x = 0 + p;
+        lowLazer1[j].rotation.x = 0 + p;
+        lowLazer2[j].rotation.x = 0 + p;
       }
     } else {
-      for (var j = 0; j < 11; j++) {
-        lazer[j].rotation.z = 0;
-        lazer[j].rotation.x += 0.007;
+      for (let j = 0; j < 11; j++) {
+        lazer[j].rotation.z += 0.007;
+        // lazer[j].rotation.x += 0.007;
         if (lazer[j].rotation.x >= maxLazerRotation) {
           // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
           lazer[j].rotation.x = -1.4;
+        }
+
+        if (topLeftLazer[j].rotation.z >= 1.4) {
+          topLeftLazer[j].rotation.z = 0;
+        } else {
+          topLeftLazer[j].visible = true;
+          topLeftLazer[j].rotation.x = -0.94;
+          topLeftLazer[j].rotation.z += 0.007;
+        }
+
+        if (topRightLazer[j].rotation.z <= -1.4) {
+          topRightLazer[j].rotation.z = 0;
+        } else {
+          topRightLazer[j].visible = true;
+          topRightLazer[j].rotation.x = -0.94;
+          topRightLazer[j].rotation.z -= 0.007;
+        }
+
+        if (lowLazer1[j].rotation.z >= 1.4) {
+          lowLazer1[j].rotation.z = 0;
+          lowLazer2[j].rotation.z = 0;
+        } else {
+          lowLazer1[j].visible = true;
+          lowLazer2[j].visible = true;
+          lowLazer1[j].rotation.x = -1.57;
+          lowLazer2[j].rotation.x = -1.57;
+          lowLazer1[j].rotation.z += 0.007;
+          lowLazer2[j].rotation.z -= 0.007;
         }
       }
     }
   } else {
     for (var i = 0; i < 11; i++) {
       lazer[i].rotation.x = 0;
+
+      topLeftLazer[i].visible = false;
+      topRightLazer[i].visible = false;
+      lowLazer1[i].visible = false;
+      lowLazer2[i].visible = false;
     }
   }
 }
