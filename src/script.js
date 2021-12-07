@@ -426,6 +426,13 @@ const lazerMaterial5 = new THREE.MeshStandardMaterial({
   depthWrite: false,
   transparent: true
 });
+const lazerMaterial6 = new THREE.MeshStandardMaterial({
+  color: 0x00ffc3,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true
+});
+
 let lazerHeight = 20;
 
 const lazerGeo = new THREE.CylinderGeometry(0.05, 0.05, lazerHeight, 32);
@@ -439,6 +446,7 @@ for (var i = 0; i < 11; i++) {
   lazer[i] = new THREE.Mesh(lazerGeo, lazerMaterial);
   lazer[i].position.set(-i + 5, 8, -5.7);
   lazer[i].rotation.x = -Math.PI * 0.35;
+  lazer[i].rotation.z = -i / 24 + 0.2;
   //lazer[i].rotation.z = (Math.PI * -0.5) / -i;
   //lazer[i].rotation.z = 0.26179938779 * -i;
   // if (i < 4) {
@@ -488,6 +496,23 @@ for (var i = 0; i < 11; i++) {
   topRightLazer[i].rotation.x = -Math.PI * 0.3;
   topRightLazer[i].rotation.z = -i / 12;
   scene.add(topRightLazer[i]);
+}
+
+let midTopLazer2 = [];
+for (var i = 0; i < 11; i++) {
+  midTopLazer2[i] = new THREE.Mesh(lazerGeo, lazerMaterial6);
+  midTopLazer2[i].position.set(-i + 5, 8, -5.7);
+  midTopLazer2[i].rotation.x = -Math.PI * 0.35;
+  midTopLazer2[i].rotation.z = -i / 24 + 0.2;
+  scene.add(midTopLazer2[i]);
+}
+let midTopLazer3 = [];
+for (var i = 0; i < 11; i++) {
+  midTopLazer3[i] = new THREE.Mesh(lazerGeo, lazerMaterial6);
+  midTopLazer3[i].position.set(-i + 5, 8, -5.7);
+  midTopLazer3[i].rotation.x = -Math.PI * 0.35;
+  midTopLazer3[i].rotation.z = -i / 24 + 0.2;
+  scene.add(midTopLazer3[i]);
 }
 
 const sphere = new THREE.Mesh(
@@ -587,33 +612,6 @@ gui
   .step(0.001)
   .name("Hemispheric Light Intensity");
 
-/* gui
-  .add(floorMaterial.uniforms.uBigWavesElevation, "value")
-  .min(0)
-  .max(1)
-  .step(0.001)
-  .name("uBigWavesElevation");
-
-gui
-  .add(floorMaterial.uniforms.uBigWavesFrequency.value, "x")
-  .min(0)
-  .max(10)
-  .step(0.001)
-  .name("uBigWavesFrequencyX");
-gui
-  .add(floorMaterial.uniforms.uBigWavesFrequency.value, "y")
-  .min(0)
-  .max(10)
-  .step(0.001)
-  .name("uBigWavesFrequencyY");
-
-gui
-  .add(floorMaterial.uniforms.uBigWavesSpeed, "value")
-  .min(0)
-  .max(4)
-  .step(0.001)
-  .name("uBigWavesSpeed");
- */
 gui
   .addColor(debugObject, "depthColor")
   .name("depthColor")
@@ -650,7 +648,7 @@ gui
     sMaterial.color.set(sphereColorObject.color1);
   });
 
-gui
+/* gui
   .add(debugElevation, "value")
   .min(0)
   .max(0.2)
@@ -661,20 +659,7 @@ gui
   .min(0)
   .max(0.35)
   .step(0.05)
-  .name("Color Offset");
-
-/* gui
-  .add(floorMaterial.uniforms.uColorOffset, "value")
-  .min(0)
-  .max(1)
-  .step(0.001)
-  .name("uColorOffset");
-gui
-  .add(floorMaterial.uniforms.uColorMulti, "value")
-  .min(0)
-  .max(10)
-  .step(0.001)
-  .name("uColorMulti"); */
+  .name("Color Offset"); */
 
 ///resize
 window.addEventListener("resize", () => {
@@ -765,45 +750,139 @@ function moveSphereWave() {
   }
 }
 
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-var maxLazerRotation = -0.1;
-
 function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-/* gui
-  .add(lazer[0].rotation, "x")
+gui
+  .add(midTopLazer2[0].rotation, "z")
   .min(-2)
   .max(2)
   .step(0.001)
-  .name("x"); */
+  .name("z");
+
+let lazerDebugObject = {
+  switch: true,
+  speed: 0.01
+};
+
+gui.add(lazerDebugObject, "switch").name("Lazers - Go Wild");
+gui
+  .add(lazerDebugObject, "speed")
+  .min(0.0001)
+  .max(0.04)
+  .step(0.001)
+  .name("Lazer Speed");
 
 function moveLazers(averageFreq) {
   if (sound && sound.isPlaying) {
     analyser.getFrequencyData(soundDataArray);
-    if (averageFreq > averageFrequencyForColorChange.value) {
-      for (var j = 0; j < 11; j++) {
-        // let p = clamp(averageFreq, -2, -0.94);
-        let p = getRandomFloat(-2, -0.25);
-        console.log(0 + p);
-        topLeftLazer[j].rotation.x = 0 + p;
-        topRightLazer[j].rotation.x = 0 + p;
-        lowLazer1[j].rotation.x = 0 + p;
-        lowLazer2[j].rotation.x = 0 + p;
-      }
-    } else {
+
+    if (
+      averageFreq > averageFrequencyForColorChange.value &&
+      !lazerDebugObject.switch
+    ) {
+      console.log("switch is off and change");
+
       for (let j = 0; j < 11; j++) {
-        lazer[j].rotation.z += 0.007;
-        // lazer[j].rotation.x += 0.007;
-        if (lazer[j].rotation.x >= maxLazerRotation) {
-          // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
-          lazer[j].rotation.x = -1.4;
+        if (lazer[j].rotation.z >= 1.3) {
+          lazer[j].rotation.z = -1.3;
+        } else {
+          lazer[j].rotation.z += lazerDebugObject.speed;
+        }
+        if (midTopLazer2[j].rotation.z >= 0.8) {
+          midTopLazer2[j].rotation.z = -0.8;
+        } else {
+          midTopLazer2[j].rotation.z += lazerDebugObject.speed;
+        }
+
+        if (midTopLazer3[j].rotation.z <= -0.8) {
+          midTopLazer3[j].rotation.z = 0.8;
+        } else {
+          midTopLazer3[j].rotation.z -= lazerDebugObject.speed;
         }
 
         if (topLeftLazer[j].rotation.z >= 1.4) {
           topLeftLazer[j].rotation.z = 0;
+        } else if (sceneBool) {
+          topLeftLazer[j].visible = true;
+          topLeftLazer[j].rotation.x = -0.94;
+          topLeftLazer[j].rotation.z += lazerDebugObject.speed;
+        }
+
+        if (topRightLazer[j].rotation.z <= -1.4) {
+          topRightLazer[j].rotation.z = 0;
+        } else if (sceneBool) {
+          topRightLazer[j].visible = true;
+          topRightLazer[j].rotation.x = -0.94;
+          topRightLazer[j].rotation.z -= lazerDebugObject.speed;
+        }
+        if (lowLazer1[j].rotation.z >= 1.4) {
+          lowLazer1[j].rotation.z = 0;
+          lowLazer2[j].rotation.z = 0;
+        } else if (sceneBool) {
+          lowLazer1[j].visible = true;
+          lowLazer2[j].visible = true;
+          lowLazer1[j].rotation.x = -1.57;
+          lowLazer2[j].rotation.x = -1.57;
+          lowLazer1[j].rotation.z += lazerDebugObject.speed;
+          lowLazer2[j].rotation.z -= lazerDebugObject.speed;
+        }
+      }
+    } else if (averageFreq > averageFrequencyForColorChange.value) {
+      for (var j = 0; j < 11; j++) {
+        let p = getRandomFloat(-2, -0.25);
+        topLeftLazer[j].rotation.x = 0 + p;
+        topRightLazer[j].rotation.x = 0 + p;
+        lowLazer1[j].rotation.x = 0 + p;
+        lowLazer2[j].rotation.x = 0 + p;
+
+        if (lazer[j].rotation.z >= 1.3) {
+          lazer[j].rotation.z = -1.3;
         } else {
+          lazer[j].rotation.z += 0.007;
+        }
+        if (midTopLazer2[j].rotation.z >= 0.8) {
+          midTopLazer2[j].rotation.z = -0.8;
+        } else {
+          midTopLazer2[j].rotation.z += 0.007;
+        }
+
+        if (midTopLazer3[j].rotation.z <= -0.8) {
+          midTopLazer3[j].rotation.z = 0.8;
+        } else {
+          midTopLazer3[j].rotation.z -= 0.007;
+        }
+      }
+    } else {
+      for (let j = 0; j < 11; j++) {
+        //lazer[j].rotation.z += 0.007;
+        //console.log(lazer[0].rotation.z);
+        // lazer[j].rotation.x += 0.007;
+        /*   if (lazer[j].rotation.x >= maxLazerRotation) {
+          // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
+          lazer[j].rotation.x = -1.4;
+        } */
+        if (lazer[j].rotation.z >= 1.3) {
+          lazer[j].rotation.z = -1.3;
+        } else {
+          lazer[j].rotation.z += 0.007;
+        }
+        if (midTopLazer2[j].rotation.z >= 0.8) {
+          midTopLazer2[j].rotation.z = -0.8;
+        } else {
+          midTopLazer2[j].rotation.z += 0.007;
+        }
+
+        if (midTopLazer3[j].rotation.z <= -0.8) {
+          midTopLazer3[j].rotation.z = 0.8;
+        } else {
+          midTopLazer3[j].rotation.z -= 0.007;
+        }
+
+        if (topLeftLazer[j].rotation.z >= 1.4) {
+          topLeftLazer[j].rotation.z = 0;
+        } else if (sceneBool) {
           topLeftLazer[j].visible = true;
           topLeftLazer[j].rotation.x = -0.94;
           topLeftLazer[j].rotation.z += 0.007;
@@ -811,7 +890,7 @@ function moveLazers(averageFreq) {
 
         if (topRightLazer[j].rotation.z <= -1.4) {
           topRightLazer[j].rotation.z = 0;
-        } else {
+        } else if (sceneBool) {
           topRightLazer[j].visible = true;
           topRightLazer[j].rotation.x = -0.94;
           topRightLazer[j].rotation.z -= 0.007;
@@ -820,7 +899,7 @@ function moveLazers(averageFreq) {
         if (lowLazer1[j].rotation.z >= 1.4) {
           lowLazer1[j].rotation.z = 0;
           lowLazer2[j].rotation.z = 0;
-        } else {
+        } else if (sceneBool) {
           lowLazer1[j].visible = true;
           lowLazer2[j].visible = true;
           lowLazer1[j].rotation.x = -1.57;
@@ -833,7 +912,8 @@ function moveLazers(averageFreq) {
   } else {
     for (var i = 0; i < 11; i++) {
       lazer[i].rotation.x = 0;
-
+      midTopLazer2[i].rotation.x = -1.55;
+      midTopLazer3[i].rotation.x = -1.55;
       topLeftLazer[i].visible = false;
       topRightLazer[i].visible = false;
       lowLazer1[i].visible = false;
@@ -868,20 +948,6 @@ bloomPass.strength = 0.8;
 renderer.toneMappingExposure = 0.4;
 const glitchPass = new GlitchPass();
 //composer.addPass(glitchPass);
-
-/* gui
-  .add(renderer, "toneMappingExposure")
-  .min(0)
-  .max(1)
-  .step(0.001)
-  .name("toneMappingExposure");
-
-gui
-  .add(bloomPass, "strength")
-  .min(0)
-  .max(1)
-  .step(0.001)
-  .name("bloomStrength"); */
 
 gui.add(cameraObject, "switch").name("Orbit Camera");
 
@@ -1069,6 +1135,12 @@ function clearScene() {
     );
     for (var i = 0; i < 11; i++) {
       lazer[i].visible = false;
+      midTopLazer2[i].visible = false;
+      midTopLazer3[i].visible = false;
+      topLeftLazer[i].visible = false;
+      topRightLazer[i].visible = false;
+      lowLazer1[i].visible = false;
+      lowLazer2[i].visible = false;
     }
     if (!sphereGroup.visible) {
       scene.add(particles);
@@ -1117,6 +1189,12 @@ function clearScene() {
     );
     for (var i = 0; i < 11; i++) {
       lazer[i].visible = true;
+      midTopLazer2[i].visible = true;
+      midTopLazer3[i].visible = true;
+      topLeftLazer[i].visible = true;
+      topRightLazer[i].visible = true;
+      lowLazer1[i].visible = true;
+      lowLazer2[i].visible = true;
     }
     scene.remove(particles);
     sphereGroup.visible = false;
