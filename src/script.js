@@ -84,9 +84,6 @@ let plane4, plane5;
 
 ////lights
 
-hemisphericLightObject = {
-  value: 0.2
-};
 const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.2);
 scene.add(hemisphericLight);
 
