@@ -10,7 +10,6 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { GlitchPass } from "three/examples/jsm/postprocessing/GlitchPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import planeVertexShader from "./shaders/flag/vertex.glsl";
 import planeFragmentShader from "./shaders/flag/fragment.glsl";
 import floorVertexShader from "./shaders/floor/vertex.glsl";
@@ -29,7 +28,6 @@ const debugObject = {};
 const perlinDebugObject = {};
 const sphereColorObject = {};
 let cameraObject = {};
-let hemisphericLightObject = {};
 
 //canvas and scene and sizes
 const canvas = document.querySelector("canvas.webGL");
@@ -762,8 +760,8 @@ gui
   .name("z");
 
 let lazerDebugObject = {
-  switch: true,
-  speed: 0.01
+  switch: false,
+  speed: 0.02
 };
 
 gui.add(lazerDebugObject, "switch").name("Lazers - Go Wild");
@@ -922,6 +920,33 @@ function moveLazers(averageFreq) {
   }
 }
 
+function moveAbletonLazers() {
+  if (abletonMusicData > 0) {
+    for (var j = 0; j < 11; j++) {
+      if (topLeftLazer[j].rotation.z >= 1.4) {
+        topLeftLazer[j].rotation.z = 0;
+      } else if (sceneBool) {
+        topLeftLazer[j].visible = true;
+        topLeftLazer[j].rotation.x = -0.94;
+        topLeftLazer[j].rotation.z += abletonMusicData * 0.005 * 2;
+      }
+
+      if (topRightLazer[j].rotation.z <= -1.4) {
+        topRightLazer[j].rotation.z = 0;
+      } else if (sceneBool) {
+        topRightLazer[j].visible = true;
+        topRightLazer[j].rotation.x = -0.94;
+        topRightLazer[j].rotation.z -= abletonMusicData * 0.005 * 2;
+      }
+    }
+  } else {
+    for (var i = 0; i < 11; i++) {
+      topLeftLazer[i].visible = false;
+      topRightLazer[i].visible = false;
+    }
+  }
+}
+
 function moveCamera() {
   gsap.to(camera.position, { x: camera.position.x + 2 });
 }
@@ -953,8 +978,8 @@ gui.add(cameraObject, "switch").name("Orbit Camera");
 
 gui
   .add(averageFrequencyForColorChange, "value")
-  .min(70)
-  .max(120)
+  .min(40)
+  .max(130)
   .step(1)
   .name("ColorChangeValue");
 
@@ -990,19 +1015,6 @@ const tick = () => {
     spotLight.color.set(randomThreeColor4);
     //moveCamera();
   }
-  /*   if (soundData) {
-    //move lazers
-    // hemisphericLight.intensity = soundData / 500;
-    const lazerAngle = elapsedTime * 0.5;
-    var maxLazerRotation = -0.1;
-    for (i = 0; i < 11; i++) {
-      lazer[i].rotation.x += 0.007;
-      if (lazer[i].rotation.x >= maxLazerRotation) {
-        // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
-        lazer[i].rotation.x = -1.4;
-      }
-    }
-  } */
 
   //update controls
   controls.update();
@@ -1042,6 +1054,7 @@ const tick = () => {
   if (abletonMusicData) {
     spotLight.intensity = abletonMusicData * 15;
     spotLight6.intensity = abletonMusicData * 15;
+    moveAbletonLazers();
   } else if (soundData) {
     spotLight.intensity = soundData * 0.05;
     spotLight6.intensity = soundData * 0.05;
@@ -1098,6 +1111,12 @@ const tick = () => {
   //for INFINITY LOOP
   // addInstancedMesh();
   //render();
+
+  ///
+  //let mikeData = analyser2.getAverageFrequency();
+  //console.log(mikeData);
+
+  ////
 
   window.requestAnimationFrame(tick);
 };
