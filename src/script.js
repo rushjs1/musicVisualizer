@@ -1109,10 +1109,6 @@ const tick = () => {
   // addInstancedMesh();
   //render();
 
-  ///
-  //let mikeData = analyser2.getAverageFrequency();
-  //console.log(mikeData);
-
   ////
 
   window.requestAnimationFrame(tick);
