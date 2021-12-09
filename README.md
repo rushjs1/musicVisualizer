@@ -3,7 +3,7 @@ Music visualization for ableton live in realtime using ableton-js, threejs and s
 https://warm-fjord-27743.herokuapp.com/
 
 <h2>Notes on using the application</h2><br />
-The main scene is compatible with both audio from Ableton Live as well as the preloaded songs from the THREE.AudioLoader. The second scene displaying frequency information is only for the preloaded songs.
+The main scene is compatible with both audio from Ableton Live as well as the preloaded songs from the THREE.AudioLoader. The second scene displaying frequency information is only for the preloaded songs. To start and stop a song.. first go to the second scene, and press any key.
 
 Please note if you would like to use the application with Ableton Live, you will need to visit the Ableton-js repo located in the credits section and follow the instructions for installing and activating the MIDI Remote Scripts from Ableton.js. Then, youll need to clone this project, install dependencies, and follow these commands (In order)
 
