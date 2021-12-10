@@ -98,7 +98,7 @@ scene.add(rectAreaLight); */
 
 const pointLight = new THREE.PointLight(0xff9000, 1, 4.5);
 pointLight.position.set(-1, -0.5, 1);
-const spotLight = new THREE.SpotLight(0x689fe3, 5, 18, Math.PI * 0.13);
+const spotLight = new THREE.SpotLight(0x689fe3, 5, 20, Math.PI * 0.13);
 spotLight.target.position.x = 4;
 spotLight.target.position.z = 4;
 const spotLight2 = new THREE.SpotLight(0xffffff, 2, 30, Math.PI * 0.15, 0.25);
@@ -112,7 +112,7 @@ const spotLight4 = new THREE.SpotLight(0x687bcd, 2, 10, Math.PI * 0.15);
 const spotLight5 = new THREE.SpotLight(0x689fe3, 2, 30, Math.PI * 0.15);
 spotLight5.target.position.z = -10;
 spotLight5.target.position.x = -6;
-const spotLight6 = new THREE.SpotLight(0x7368e3, 5, 18, Math.PI * 0.13);
+const spotLight6 = new THREE.SpotLight(0x7368e3, 5, 20, Math.PI * 0.13);
 spotLight6.target.position.x = -4;
 spotLight6.target.position.z = 4;
 
@@ -156,6 +156,13 @@ window.requestAnimationFrame(() => {
 let debugSpotLightObject = {
   switch: false
 };
+
+gui
+  .add(spotLight6, "distance")
+  .min(0)
+  .max(50)
+  .step(1)
+  .name("light6distance");
 
 gui
   .add(debugSpotLightObject, "switch")
@@ -238,6 +245,36 @@ volumetricSpotLightMaterial2.uniforms.spotPosition.value =
 volumetricSpotLightMaterial2.uniforms.anglePower.value = 0;
 volumetricSpotLightMaterial2.uniforms.attenuation.value = 10;
 scene.add(volumetricSpotLight2);
+
+let volumetricSpotLightMaterial3 = new VolumetricSpotLightMaterial();
+let volumetricSpotLight3 = new THREE.Mesh(
+  volumetricSpotLightGeometry,
+  volumetricSpotLightMaterial3
+);
+
+volumetricSpotLight3.position.set(9.5, 8, 2.5);
+volumetricSpotLight3.lookAt(new THREE.Vector3(0, 8, 2.5));
+volumetricSpotLightMaterial3.uniforms.lightColor.value.set("white");
+volumetricSpotLightMaterial3.uniforms.spotPosition.value =
+  volumetricSpotLight3.position;
+volumetricSpotLightMaterial3.uniforms.anglePower.value = 0;
+volumetricSpotLightMaterial3.uniforms.attenuation.value = 10;
+scene.add(volumetricSpotLight3);
+
+let volumetricSpotLightMaterial4 = new VolumetricSpotLightMaterial();
+let volumetricSpotLight4 = new THREE.Mesh(
+  volumetricSpotLightGeometry,
+  volumetricSpotLightMaterial4
+);
+
+volumetricSpotLight4.position.set(-4.5, 7.3, -5.5);
+volumetricSpotLight4.lookAt(new THREE.Vector3(0, 8, 2.5));
+volumetricSpotLightMaterial4.uniforms.lightColor.value.set("white");
+volumetricSpotLightMaterial4.uniforms.spotPosition.value =
+  volumetricSpotLight4.position;
+volumetricSpotLightMaterial4.uniforms.anglePower.value = 0;
+volumetricSpotLightMaterial4.uniforms.attenuation.value = 10;
+scene.add(volumetricSpotLight4);
 
 ////
 
@@ -836,6 +873,8 @@ function moveLazers(averageFreq) {
     analyser.getFrequencyData(soundDataArray);
     volumetricSpotLight1.visible = true;
     volumetricSpotLight2.visible = true;
+    volumetricSpotLight3.visible = true;
+    volumetricSpotLight4.visible = true;
     if (
       averageFreq > averageFrequencyForColorChange.value &&
       !lazerDebugObject.switch
@@ -978,6 +1017,8 @@ function moveLazers(averageFreq) {
       lowLazer2[i].visible = false;
       volumetricSpotLight1.visible = false;
       volumetricSpotLight2.visible = false;
+      volumetricSpotLight3.visible = false;
+      volumetricSpotLight4.visible = false;
     }
   }
 }
@@ -1052,6 +1093,7 @@ function logAf(data) {
   afDV.appendChild(item);
 }
 
+console.log(hemisphericLight);
 ///animations///
 const clock = new THREE.Clock();
 
@@ -1081,6 +1123,14 @@ const tick = () => {
     volumetricSpotLightMaterial2.uniforms.lightColor.value.set(
       randomThreeColor3
     );
+    volumetricSpotLightMaterial3.uniforms.lightColor.value.set(
+      randomThreeColor4
+    );
+    volumetricSpotLightMaterial4.uniforms.lightColor.value.set(
+      randomThreeColor3
+    );
+
+    hemisphericLight.color.set(randomThreeColor3);
     //moveCamera();
   }
 
@@ -1170,15 +1220,22 @@ const tick = () => {
     camera.position.z = camera.position.z;
   }
 
-  let spotSTarget = new THREE.Vector3(Math.sin(cameraAngle) * 8, 0, 1);
-  volumetricSpotLight1.lookAt(spotSTarget);
+  let spotLightTarget = new THREE.Vector3(Math.sin(cameraAngle) * 8, 0, 1);
+  volumetricSpotLight1.lookAt(spotLightTarget);
   //let spotSTarget2 = new THREE.Vector3(Math.sin(cameraAngle) * 22, 4, 5);
-  let spotSTarget2 = new THREE.Vector3(
+  let spotLightTarget2 = new THREE.Vector3(
     Math.cos(cameraAngle) * 2,
     Math.cos(cameraAngle) * 4,
     5
   );
-  volumetricSpotLight2.lookAt(spotSTarget2);
+  volumetricSpotLight2.lookAt(spotLightTarget2);
+  let spotLightTarget3 = new THREE.Vector3(
+    -Math.cos(cameraAngle) * 2,
+    -Math.cos(cameraAngle) * 4,
+    5
+  );
+  volumetricSpotLight3.lookAt(spotLightTarget3);
+  volumetricSpotLight4.lookAt(spotLightTarget);
 
   //updateTorus(soundData, 60, 30);
   //updateShader(abletonMusicData, 160, 130);
@@ -1226,7 +1283,9 @@ function clearScene() {
       stageScreen3,
       piano.scene,
       volumetricSpotLight1,
-      volumetricSpotLight2
+      volumetricSpotLight2,
+      volumetricSpotLight3,
+      volumetricSpotLight4
     );
     for (var i = 0; i < 11; i++) {
       lazer[i].visible = false;
@@ -1282,7 +1341,9 @@ function clearScene() {
       stageScreen3,
       piano.scene,
       volumetricSpotLight1,
-      volumetricSpotLight2
+      volumetricSpotLight2,
+      volumetricSpotLight3,
+      volumetricSpotLight4
     );
     for (var i = 0; i < 11; i++) {
       lazer[i].visible = true;
