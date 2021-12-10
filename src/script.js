@@ -89,7 +89,7 @@ let plane4, plane5;
 
 ////lights
 
-const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.2);
+const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.099);
 scene.add(hemisphericLight);
 
 /* const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
@@ -165,10 +165,16 @@ gui
   .name("light6distance");
 
 gui
+  .add(spotLight, "distance")
+  .min(0)
+  .max(50)
+  .step(1)
+  .name("light1Distance");
+
+gui
   .add(debugSpotLightObject, "switch")
   .name("Light Helpers Active")
   .onChange(() => {
-    console.log(debugSpotLightObject.switch);
     if (!debugSpotLightObject.switch) {
       scene.remove(
         pointLightHelper,
@@ -681,7 +687,7 @@ function positionSpheres() {
 }
 
 scene.add(
-  sphere,
+  //sphere,
   plane,
   flagPole,
   // floor,
@@ -848,13 +854,6 @@ function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-gui
-  .add(midTopLazer2[0].rotation, "z")
-  .min(-2)
-  .max(2)
-  .step(0.001)
-  .name("z");
-
 let lazerDebugObject = {
   switch: false,
   speed: 0.02
@@ -879,8 +878,6 @@ function moveLazers(averageFreq) {
       averageFreq > averageFrequencyForColorChange.value &&
       !lazerDebugObject.switch
     ) {
-      console.log("switch is off and change");
-
       for (let j = 0; j < 11; j++) {
         if (lazer[j].rotation.z >= 1.3) {
           lazer[j].rotation.z = -1.3;
@@ -1025,7 +1022,28 @@ function moveLazers(averageFreq) {
 
 function moveAbletonLazers() {
   if (abletonMusicData > 0) {
+    volumetricSpotLight1.visible = true;
+    volumetricSpotLight2.visible = true;
+    volumetricSpotLight3.visible = true;
+    volumetricSpotLight4.visible = true;
     for (var j = 0; j < 11; j++) {
+      if (lazer[j].rotation.z >= 1.3) {
+        lazer[j].rotation.z = -1.3;
+      } else {
+        lazer[j].rotation.z += abletonMusicData * 0.005 * 2;
+      }
+      if (midTopLazer2[j].rotation.z >= 0.8) {
+        midTopLazer2[j].rotation.z = -0.8;
+      } else {
+        midTopLazer2[j].rotation.z += abletonMusicData * 0.005 * 2;
+      }
+
+      if (midTopLazer3[j].rotation.z <= -0.8) {
+        midTopLazer3[j].rotation.z = 0.8;
+      } else {
+        midTopLazer3[j].rotation.z -= abletonMusicData * 0.005 * 2;
+      }
+
       if (topLeftLazer[j].rotation.z >= 1.4) {
         topLeftLazer[j].rotation.z = 0;
       } else if (sceneBool) {
@@ -1041,11 +1059,28 @@ function moveAbletonLazers() {
         topRightLazer[j].rotation.x = -0.94;
         topRightLazer[j].rotation.z -= abletonMusicData * 0.005 * 2;
       }
+
+      if (lowLazer1[j].rotation.z >= 1.4) {
+        lowLazer1[j].rotation.z = 0;
+        lowLazer2[j].rotation.z = 0;
+      } else if (sceneBool) {
+        lowLazer1[j].visible = true;
+        lowLazer2[j].visible = true;
+        lowLazer1[j].rotation.x = -1.57;
+        lowLazer2[j].rotation.x = -1.57;
+        lowLazer1[j].rotation.z += abletonMusicData * 0.005 * 2;
+        lowLazer2[j].rotation.z -= abletonMusicData * 0.005 * 2;
+      }
     }
   } else {
     for (var i = 0; i < 11; i++) {
+      lazer[i].visible = false;
+      midTopLazer2[i].visible = false;
+      midTopLazer3[i].visible = false;
       topLeftLazer[i].visible = false;
       topRightLazer[i].visible = false;
+      lowLazer1[i].visible = false;
+      lowLazer2[i].visible = false;
     }
   }
 }
@@ -1061,27 +1096,37 @@ socket.on("musicEmit", function(msg) {
   abletonMusicData = msg;
 });
 
+let abletonChangeValueObject = {
+  value: 0.9
+};
+gui
+  .add(abletonChangeValueObject, "value")
+  .min(0.2)
+  .max(0.9)
+  .step(0.1)
+  .name("Ableton Change Value");
+
 let randomThreeColor = new THREE.Color(0xffffff);
 let randomThreeColor2 = new THREE.Color(0xffffff);
 let randomThreeColor3 = new THREE.Color(0xffffff);
 let randomThreeColor4 = new THREE.Color(0xffffff);
 //postprocessing effects
-const composer = new EffectComposer(renderer);
-let renderPass = new RenderPass(scene, camera);
+//const composer = new EffectComposer(renderer);
+//let renderPass = new RenderPass(scene, camera);
 
-composer.addPass(renderPass);
-const bloomPass = new UnrealBloomPass();
-bloomPass.strength = 0.8;
+//composer.addPass(renderPass);
+//const bloomPass = new UnrealBloomPass();
+//bloomPass.strength = 0.8;
 //composer.addPass(bloomPass);
-renderer.toneMappingExposure = 0.4;
-const glitchPass = new GlitchPass();
+//renderer.toneMappingExposure = 0.4;
+//const glitchPass = new GlitchPass();
 //composer.addPass(glitchPass);
 
 gui.add(cameraObject, "switch").name("Orbit Camera");
 
 gui
   .add(averageFrequencyForColorChange, "value")
-  .min(40)
+  .min(15)
   .max(130)
   .step(1)
   .name("ColorChangeValue");
@@ -1093,7 +1138,6 @@ function logAf(data) {
   afDV.appendChild(item);
 }
 
-console.log(hemisphericLight);
 ///animations///
 const clock = new THREE.Clock();
 
@@ -1137,7 +1181,7 @@ const tick = () => {
   //update controls
   controls.update();
 
-  if (abletonMusicData > 0.9) {
+  if (abletonMusicData > abletonChangeValueObject.value) {
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData * 0.5;
 
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
@@ -1145,14 +1189,12 @@ const tick = () => {
     //postprocessing
     //bloomPass.strength = 0.4;
     //bloomPass.strength = abletonMusicData;
-    glitchPass.goWild = true;
+    //glitchPass.goWild = true;
     const randomColorHex = Math.floor(Math.random() * 16777215).toString(16);
     const randomColorHex2 = Math.floor(Math.random() * 16777215).toString(16);
 
     let newColor = `#${randomColorHex}`;
     let newColor2 = `#${randomColorHex2}`;
-
-    console.log(newColor);
 
     randomThreeColor.set(newColor);
     randomThreeColor2.set(newColor2);
@@ -1161,17 +1203,31 @@ const tick = () => {
       randomThreeColor
     );
     perlinColorShaderMaterial.uniforms.uDepthColor.value.set(randomThreeColor2);
+
+    hemisphericLight.color.set(randomThreeColor);
+    volumetricSpotLightMaterial1.uniforms.lightColor.value.set(
+      randomThreeColor2
+    );
+    volumetricSpotLightMaterial2.uniforms.lightColor.value.set(
+      randomThreeColor
+    );
+    volumetricSpotLightMaterial3.uniforms.lightColor.value.set(
+      randomThreeColor2
+    );
+    volumetricSpotLightMaterial4.uniforms.lightColor.value.set(
+      randomThreeColor
+    );
   } else {
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     // bloomPass.strength = abletonMusicData / 3;
-    glitchPass.goWild = false;
+    //glitchPass.goWild = false;
     //bloomPass.strength = 0.2;
   }
 
   if (abletonMusicData) {
-    spotLight.intensity = abletonMusicData * 15;
-    spotLight6.intensity = abletonMusicData * 15;
+    spotLight.intensity = abletonMusicData * 6;
+    spotLight6.intensity = abletonMusicData * 6;
     moveAbletonLazers();
   } else if (soundData) {
     spotLight.intensity = soundData * 0.05;
@@ -1210,7 +1266,7 @@ const tick = () => {
   //soundData * 0.003;
   perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
-  ///camera
+  /// Orbit Camera
   const cameraAngle = elapsedTime * 0.5;
   if (cameraObject.switch) {
     camera.position.x = Math.cos(cameraAngle) * 22;
@@ -1220,6 +1276,7 @@ const tick = () => {
     camera.position.z = camera.position.z;
   }
 
+  /// Animate Volumetric spot lights
   let spotLightTarget = new THREE.Vector3(Math.sin(cameraAngle) * 8, 0, 1);
   volumetricSpotLight1.lookAt(spotLightTarget);
   //let spotSTarget2 = new THREE.Vector3(Math.sin(cameraAngle) * 22, 4, 5);
@@ -1237,14 +1294,9 @@ const tick = () => {
   volumetricSpotLight3.lookAt(spotLightTarget3);
   volumetricSpotLight4.lookAt(spotLightTarget);
 
-  //updateTorus(soundData, 60, 30);
-  //updateShader(abletonMusicData, 160, 130);
-
   //render
-  //renderer.render(scene, camera);
-  composer.render();
-  //for INFINITY LOOP
-  // addInstancedMesh();
+  renderer.render(scene, camera);
+  //composer.render();
   //render();
 
   ////
@@ -1267,10 +1319,9 @@ function clearScene() {
   console.log(sceneBool);
   if (!sceneBool) {
     scene.remove(
-      sphere,
+      //sphere,
       plane,
       flagPole,
-      // floor,
       plane2,
       plane3,
       plane4,
@@ -1324,10 +1375,8 @@ function clearScene() {
     }
   } else if (sceneBool) {
     scene.add(
-      sphere,
-
+      // sphere,
       plane,
-      //  floor,
       plane2,
       plane3,
       plane4,
@@ -1367,5 +1416,3 @@ clearBtn.addEventListener("click", () => {
   console.log("clear");
   clearScene();
 });
-
-console.log("push to both remote origins test");
