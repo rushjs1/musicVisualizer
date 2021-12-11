@@ -38,10 +38,6 @@ const sizes = {
   height: window.innerHeight
 };
 
-//fog
-/* const fog = new THREE.Fog(0xc5c7c8, 0.1, 50);
-scene.fog = fog;
- */
 ////textures////
 const textureLoader = new THREE.TextureLoader();
 const soicTexture = textureLoader.load("/shaderTextures/soicMask1.jpeg");
@@ -91,10 +87,6 @@ let plane4, plane5;
 
 const hemisphericLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.099);
 scene.add(hemisphericLight);
-
-/* const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
-rectAreaLight.position.set(-1.5, 0, 1.5);
-scene.add(rectAreaLight); */
 
 const pointLight = new THREE.PointLight(0xff9000, 1, 4.5);
 pointLight.position.set(-1, -0.5, 1);
@@ -321,7 +313,6 @@ const material = new THREE.MeshStandardMaterial();
 material.roughness = 0.4;
 perlinDebugObject.surfaceColor = "#0087ff";
 perlinDebugObject.depthColor = "#88949d";
-//perlinDebugObject.depthColor = "#000000";
 
 const perlinColorShaderMaterial = new THREE.ShaderMaterial({
   fragmentShader: perlinColorFragmentShader,
@@ -345,10 +336,6 @@ const perlinColorShaderMaterial = new THREE.ShaderMaterial({
 ///ball start
 
 var icosahedronGeometry = new THREE.IcosahedronGeometry(40, 16);
-var lambertMaterial = new THREE.MeshLambertMaterial({
-  color: 0xff00ee,
-  wireframe: true
-});
 
 var ball = new THREE.Mesh(icosahedronGeometry, perlinColorShaderMaterial);
 ball.position.set(0, 0, 0);
@@ -391,9 +378,6 @@ const floor = new THREE.Mesh(
   new THREE.PlaneGeometry(20, 30, 128, 128),
   floorMaterial
 );
-
-/* non spiked */
-//const floor = new THREE.Mesh(floorGeo, floorMaterial);
 
 floor.rotation.x = -Math.PI * 0.5;
 floor.position.y = -0.65;
@@ -547,15 +531,7 @@ for (var i = 0; i < 11; i++) {
   lazer[i].position.set(-i + 5, 8, -5.7);
   lazer[i].rotation.x = -Math.PI * 0.35;
   lazer[i].rotation.z = -i / 24 + 0.2;
-  //lazer[i].rotation.z = (Math.PI * -0.5) / -i;
-  //lazer[i].rotation.z = 0.26179938779 * -i;
-  // if (i < 4) {
-  //  lazer[i].rotation.z = (Math.PI * 0.35) / -i;
-  //} else {
-  //  //lazer[i].rotation.z = (Math.PI * -0.5) / -i;
-  //  lazer[i].rotation.z = -0.26179938779;
-  //}
-  //lazer[i].rotation.z = -0.22439947525;
+
   scene.add(lazer[i]);
 }
 
@@ -748,19 +724,6 @@ gui
     sMaterial.color.set(sphereColorObject.color1);
   });
 
-/* gui
-  .add(debugElevation, "value")
-  .min(0)
-  .max(0.2)
-  .step(0.1)
-  .name("Floor Elevation");
-gui
-  .add(debugColorOffset, "value")
-  .min(0)
-  .max(0.35)
-  .step(0.05)
-  .name("Color Offset"); */
-
 ///resize
 window.addEventListener("resize", () => {
   //update size
@@ -950,13 +913,6 @@ function moveLazers(averageFreq) {
       }
     } else {
       for (let j = 0; j < 11; j++) {
-        //lazer[j].rotation.z += 0.007;
-        //console.log(lazer[0].rotation.z);
-        // lazer[j].rotation.x += 0.007;
-        /*   if (lazer[j].rotation.x >= maxLazerRotation) {
-          // lazer[i].rotation.x = Math.sin(elapsedTime * lazerAngle);
-          lazer[j].rotation.x = -1.4;
-        } */
         if (lazer[j].rotation.z >= 1.3) {
           lazer[j].rotation.z = -1.3;
         } else {
@@ -1175,7 +1131,6 @@ const tick = () => {
     );
 
     hemisphericLight.color.set(randomThreeColor3);
-    //moveCamera();
   }
 
   //update controls
@@ -1186,10 +1141,6 @@ const tick = () => {
 
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
 
-    //postprocessing
-    //bloomPass.strength = 0.4;
-    //bloomPass.strength = abletonMusicData;
-    //glitchPass.goWild = true;
     const randomColorHex = Math.floor(Math.random() * 16777215).toString(16);
     const randomColorHex2 = Math.floor(Math.random() * 16777215).toString(16);
 
@@ -1217,6 +1168,8 @@ const tick = () => {
     volumetricSpotLightMaterial4.uniforms.lightColor.value.set(
       randomThreeColor
     );
+    spotLight6.color.set(randomThreeColor);
+    spotLight.color.set(randomThreeColor2);
   } else {
     floorMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
     perlinColorShaderMaterial.uniforms.uBigWavesElevation.value = abletonMusicData;
@@ -1237,10 +1190,6 @@ const tick = () => {
   //shaders
   shaderOneMaterial.uniforms.uTime.value = elapsedTime;
 
-  //floorMaterial.uniforms.uTime.value = soundData * 0.02;
-  //shaders
-  //floorMaterial.uniforms.uBigWavesElevation.value = soundData * 0.003;
-
   /* try with ableton */
   //bloomPass.strength = abletonMusicData / 3;
 
@@ -1252,19 +1201,6 @@ const tick = () => {
   perlinColorShaderMaterial.uniforms.uColorMulti.value = abletonMusicData;
   perlinColorShaderMaterial.uniforms.uColorOffset.value = abletonMusicData;
   perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = abletonMusicData;
-
-  /* normal threejs loader sound data */
-  /*   floorMaterial.uniforms.uColorMulti.value = soundData * 0.01;
-
-  floorMaterial.uniforms.uColorOffset.value = soundData * 0.002;
-
-  floorMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
-
-  /*   perlinColorShaderMaterial.uniforms.uColorMulti.value = soundData * 0.01;
-  perlinColorShaderMaterial.uniforms.uColorOffset.value = soundData * 0.002;
-  //perlinColorShaderMaterial.uniforms.uBigWavesElevation.value =
-  //soundData * 0.003;
-  perlinColorShaderMaterial.uniforms.uBigWavesSpeed.value = soundData * 0.01; */
 
   /// Orbit Camera
   const cameraAngle = elapsedTime * 0.5;
@@ -1279,7 +1215,7 @@ const tick = () => {
   /// Animate Volumetric spot lights
   let spotLightTarget = new THREE.Vector3(Math.sin(cameraAngle) * 8, 0, 1);
   volumetricSpotLight1.lookAt(spotLightTarget);
-  //let spotSTarget2 = new THREE.Vector3(Math.sin(cameraAngle) * 22, 4, 5);
+
   let spotLightTarget2 = new THREE.Vector3(
     Math.cos(cameraAngle) * 2,
     Math.cos(cameraAngle) * 4,
