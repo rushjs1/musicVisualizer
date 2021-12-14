@@ -64,3 +64,40 @@ body {
 #average-frequency {
   color: dodgerblue;
 }
+
+.play-dv {
+  color: white;
+  background-color: dodgerblue;
+  border-radius: 50px;
+  width: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  margin-top: 10px;
+  display: none;
+}
+
+.play-dv:hover {
+  background-color: white;
+  color: dodgerblue;
+  cursor: pointer;
+}
+.pause-dv {
+  color: white;
+  background-color: dodgerblue;
+  border-radius: 50px;
+  width: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
+  user-select: none;
+  margin-top: 10px;
+}
+
+.pause-dv:hover {
+  background-color: white;
+  color: dodgerblue;
+  cursor: pointer;
+}

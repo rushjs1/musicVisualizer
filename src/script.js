@@ -1244,6 +1244,8 @@ tick();
 
 //helpers
 //remove scene attempt
+let playBtn = document.querySelector(".play-dv");
+let pauseBtn = document.querySelector(".pause-dv");
 
 selectSongDV.style.display = "none";
 
@@ -1293,7 +1295,7 @@ function clearScene() {
       scene.background = new THREE.Color(0x6e6e6e);
       selectSongDV.style.display = "block";
       positionSpheres();
-
+      playBtn.style.display = "flex";
       window.addEventListener("keypress", event => {
         if (sound && !sound.isPlaying) {
           sound.play();
@@ -1306,6 +1308,22 @@ function clearScene() {
           sound.play();
         } else {
           sound.pause();
+        }
+      });
+      playBtn.addEventListener("click", () => {
+        console.log("play");
+        if (sound && !sound.isPlaying) {
+          sound.play();
+          playBtn.style.display = "none";
+          pauseBtn.style.display = "flex";
+        }
+      });
+      pauseBtn.addEventListener("click", () => {
+        console.log("pause");
+        if (sound && sound.isPlaying) {
+          sound.pause();
+          pauseBtn.style.display = "none";
+          playBtn.style.display = "flex";
         }
       });
     }
