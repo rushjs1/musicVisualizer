@@ -1244,6 +1244,7 @@ tick();
 
 //helpers
 //remove scene attempt
+let moveCamBtn;
 let playBtn = document.querySelector(".play-dv");
 let pauseBtn = document.querySelector(".pause-dv");
 
@@ -1285,6 +1286,8 @@ function clearScene() {
       lowLazer1[i].visible = false;
       lowLazer2[i].visible = false;
     }
+    moveCamBtn.style.display = "none";
+
     if (!sphereGroup.visible) {
       scene.add(particles);
       sphereGroup.visible = true;
@@ -1357,6 +1360,7 @@ function clearScene() {
       lowLazer1[i].visible = true;
       lowLazer2[i].visible = true;
     }
+    moveCamBtn.style.display = "flex";
     scene.remove(particles);
     sphereGroup.visible = false;
     selectSongDV.style.display = "none";
@@ -1369,4 +1373,15 @@ var clearBtn = document.querySelector(".clear-scene-btn");
 clearBtn.addEventListener("click", () => {
   console.log("clear");
   clearScene();
+});
+
+moveCamBtn = document.querySelector(".moveCam");
+moveCamBtn.addEventListener("click", () => {
+  gsap.to(camera.position, {
+    duration: 4,
+    delay: 0,
+    z: -5,
+    x: 0,
+    y: 6
+  });
 });
