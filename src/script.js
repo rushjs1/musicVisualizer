@@ -127,15 +127,6 @@ const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
 const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
 const spotLightHelper6 = new THREE.SpotLightHelper(spotLight6);
 
-/* scene.add(
-  pointLightHelper,
-  spotLightHelper,
-  spotLightHelper2,
-  spotLightHelper3,
-  spotLightHelper4,
-  spotLightHelper5,
-  spotLightHelper6
-); */
 window.requestAnimationFrame(() => {
   spotLightHelper.update();
   spotLightHelper2.update();
@@ -663,10 +654,8 @@ function positionSpheres() {
 }
 
 scene.add(
-  //sphere,
   plane,
   flagPole,
-  // floor,
   plane2,
   plane3,
   plane4,
@@ -1258,7 +1247,6 @@ function clearScene() {
   console.log(sceneBool);
   if (!sceneBool) {
     scene.remove(
-      //sphere,
       plane,
       flagPole,
       plane2,
