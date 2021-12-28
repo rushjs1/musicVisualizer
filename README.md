@@ -11,7 +11,7 @@ Please note if you would like to use the application with Ableton Live, you will
 
 2.) Launch Node Server - node server.js
 
-3.) terminate dev server, then click back onto the applicaiton and wait for the log that a user has been connected.
+3.) terminate dev server, then click back onto the application and wait for the log that a user has been connected.
 
 4.) Play something from Ableton Live and enjoy. :)
 
